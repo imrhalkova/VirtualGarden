@@ -30,4 +30,36 @@ namespace VirtualGarden
     {
         public Daisy() : base("Daisy", 5, 0, 5, 3, 5) { }
     }
+
+    public static class FlowerTypes
+    {
+        static Flower Daisy = new Daisy();
+    }
+
+    public class PlantedFlower
+    {
+        public Flower FlowerType { get; private set; }
+        public int GrowthDays { get; set; }
+
+        public int BloomDays { get; set; }
+
+        public int DaysSinceLastWatered { get; set; }
+
+        public FlowerState State { get; set; }
+
+        public PlantedFlower(Flower flower)
+        {
+            FlowerType = flower;
+            GrowthDays = 0;
+            BloomDays = 0;
+            DaysSinceLastWatered = -1;
+            State = FlowerState.Growing;
+        }
+    }
+
+    public enum FlowerState
+    {
+        Growing,
+        Blooming
+    }
 }
