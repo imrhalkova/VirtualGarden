@@ -14,6 +14,8 @@ namespace VirtualGarden
         public bool HasWeed {  get; set; } = false;
         public bool HasBugs { get; set; } = false;
 
+        public bool HasCoins { get; set; } = false;
+
         public Tile(Garden garden)
         {
             _garden = garden;
@@ -40,7 +42,16 @@ namespace VirtualGarden
             HasWeed = false;
         }
 
-        public void Update()
+        public void CollectCoins()
+        {
+            if (HasCoins)
+            {
+                _garden.Player.Money += Flower.FlowerType.DailyBloomIncome;
+                HasCoins = false;
+            }
+        }
+
+        public void UpdateFlowers()
         {
             if (Flower is not null)
             {
@@ -59,21 +70,29 @@ namespace VirtualGarden
                 {
                     if (Flower.BloomDays < Flower.FlowerType.BloomDays && !HasWeed)
                     {
-                        _garden.Player.Money += Flower.FlowerType.DailyBloomIncome;
+                        HasCoins = true;
                         Flower.BloomDays += 1;
                     }
                 }
                 if (Flower.BloomDays == Flower.FlowerType.BloomDays)
                 {
-                    RemoveFlower();
+                    Flower.State = FlowerState.Dead;
                 }
             }
-            else
+        }
+        public void TrySpawningWeed()
+        {
+            if (Flower is null && _garden.rand.NextDouble() <= _garden.WeedChance)
             {
-                if (_garden.rand.NextDouble() <= _garden.WeedChance)
-                {
-                    HasWeed = true;
-                }
+                HasWeed = true;
+            }
+
+        }
+        public void TrySpreadingWeed()
+        {
+            if (_garden.rand.NextDouble() <= _garden.WeedSpreadChance)
+            {
+                HasWeed = true;
             }
         }
     }

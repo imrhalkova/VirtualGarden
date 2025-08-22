@@ -60,6 +60,7 @@ namespace VirtualGarden
     public enum FlowerState
     {
         Growing,
-        Blooming
+        Blooming,
+        Dead
     }
 }
