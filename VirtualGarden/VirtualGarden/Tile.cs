@@ -10,73 +10,94 @@ namespace VirtualGarden
     public class Tile
     {
         private Garden _garden;
+        public int Row { get; private set; }
+        public int Column { get; private set; }
         public PlantedFlower? Flower {  get; private set; }
         public bool HasWeed {  get; set; } = false;
-        public bool HasBugs { get; set; } = false;
-
+        public Bugs? Bugs { get; set; }
         public bool HasCoins { get; set; } = false;
+        public int DaysSinceLastWatered { get; set; }
 
-        public Tile(Garden garden)
+        public Tile(Garden garden, int row, int column)
         {
             _garden = garden;
+            DaysSinceLastWatered = -1;
+            Row = row;
+            Column = column;
         }
 
         public void PlantFlower(Flower flower)
         {
+            if (Flower is not null)
+            {
+                throw new FlowerAlreadyPresentException();
+            }
             Flower = new PlantedFlower(flower);
         }
 
         public void RemoveFlower()
         {
+            if (Flower is null)
+            {
+                throw new FlowerNotPresentException();
+            }
             Flower = null;
         }
 
-        public void WaterFlower()
+        public void WaterTile()
         {
             if (Flower is not null)
-            Flower.DaysSinceLastWatered = 0;
+            this.DaysSinceLastWatered = 0;
         }
 
         public void RemoveWeed()
         {
+            if (!HasWeed)
+            {
+                throw new WeedNotPresentException();
+            }
             HasWeed = false;
         }
 
         public void CollectCoins()
         {
-            if (HasCoins)
+            if (!HasCoins)
             {
-                _garden.Player.Money += Flower.FlowerType.DailyBloomIncome;
-                HasCoins = false;
+                throw new CoinsNotPresentException();
             }
+            _garden.Player.Money += Flower.FlowerType.DailyBloomIncome;
+            HasCoins = false;
         }
 
-        public void UpdateFlowers()
+        public void UpdateFlower()
         {
             if (Flower is not null)
             {
-                if (Flower.State == FlowerState.Growing)
+                switch (Flower.State)
                 {
-                    if (Flower.DaysSinceLastWatered <= Flower.FlowerType.DaysBetweenWatering && !HasWeed)
-                    {
-                        Flower.GrowthDays += 1;
-                    }
-                    if (Flower.GrowthDays == Flower.FlowerType.GrowthDays)
-                    {
-                        Flower.State = FlowerState.Blooming;
-                    }
-                }
-                if (Flower.State == FlowerState.Blooming)
-                {
-                    if (Flower.BloomDays < Flower.FlowerType.BloomDays && !HasWeed)
-                    {
-                        HasCoins = true;
-                        Flower.BloomDays += 1;
-                    }
-                }
-                if (Flower.BloomDays == Flower.FlowerType.BloomDays)
-                {
-                    Flower.State = FlowerState.Dead;
+                    case FlowerState.Growing:
+                        if (this.DaysSinceLastWatered <= Flower.FlowerType.DaysBetweenWatering && !HasWeed)
+                        {
+                            Flower.GrowthDays += 1;
+                        }
+                        if (Flower.GrowthDays == Flower.FlowerType.GrowthDays)
+                        {
+                            Flower.State = FlowerState.Blooming;
+                        }
+                        break;
+                    case FlowerState.Blooming:
+                        if (Flower.BloomDays < Flower.FlowerType.BloomDays && !HasWeed)
+                        {
+                            HasCoins = true;
+                            Flower.BloomDays += 1;
+                        }
+                        if (Flower.BloomDays == Flower.FlowerType.BloomDays)
+                        {
+                            Flower.State = FlowerState.Dead;
+                        }
+                        break;
+                    case FlowerState.Dead:
+                        break;
                 }
             }
         }

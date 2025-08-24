@@ -43,8 +43,6 @@ namespace VirtualGarden
 
         public int BloomDays { get; set; }
 
-        public int DaysSinceLastWatered { get; set; }
-
         public FlowerState State { get; set; }
 
         public PlantedFlower(Flower flower)
@@ -52,7 +50,6 @@ namespace VirtualGarden
             FlowerType = flower;
             GrowthDays = 0;
             BloomDays = 0;
-            DaysSinceLastWatered = -1;
             State = FlowerState.Growing;
         }
     }

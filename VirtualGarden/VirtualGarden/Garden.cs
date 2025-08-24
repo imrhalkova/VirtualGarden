@@ -33,10 +33,13 @@ namespace VirtualGarden
             }
         }
 
-        private double _normalBugsChance = 0.3;
+        //the chance of bugs spawning on a tile with a flower with no active event affecting bugs spawning
+        private double _normalBugsChance = 0.05;
 
+        //the chance of bugs spawning on a tile with a flower with an active event affecting bugs spawning
         double? EventBugsChance { get; set; } = null;
 
+        //the probability actually used for spawning bugs on tiles with flowers
         public double BugsChance
         {
             get
@@ -49,6 +52,7 @@ namespace VirtualGarden
             }
         }
 
+        //the chance of weed spreading to this tile if one adjacent tile has weed
         public double WeedSpreadChance { get; private set; } = 0.5;
 
         public Random rand { get; } = new Random();
@@ -77,7 +81,7 @@ namespace VirtualGarden
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    grid[i, j] = new Tile(this);
+                    grid[i, j] = new Tile(this, i, j);
                 }
             }
         }
@@ -94,38 +98,18 @@ namespace VirtualGarden
         {
             foreach (Tile tile in grid)
             {
-                tile.UpdateFlowers();
+                tile.UpdateFlower();
             }
             UpdateWeed();
             Player.Money += NewDayIncome;
         }
+
+        //Updates weed for a new day - tries spreading weed from previous days and spawning new weed to empty tiles
         public void UpdateWeed()
         {
-            bool[,] previousWeedPositions = new bool[grid.GetLength(0), grid.GetLength(1)];
-            for (int i = 0; i < grid.GetLength(0); i++)
-            {
-                for (int j = 0; j < grid.GetLength(1); j++)
-                {
-                    previousWeedPositions[i, j] = GetTile(i, j).HasWeed;
-                }
-            }
+            bool[,] currentPosOfWeed = GetCurrentPosOfWeed();
 
-            for (int i = 0; i < grid.GetLength(0); i++)
-            {
-                for (int j = 0; j < grid.GetLength(1); j++)
-                {
-                    Tile tile = GetTile(i, j);
-                    if (!tile.HasWeed)
-                    {
-                        var adjacentIndexes = GetIndexesOfAdjacentTiles(i, j);
-                        foreach ((int, int) index in adjacentIndexes)
-                        {
-                            GetTile(index).TrySpreadingWeed();
-                        }
-                    }
-                
-                }
-            }
+            TrySpreadingWeed();
 
             foreach (Tile tile in grid)
             {
@@ -133,6 +117,37 @@ namespace VirtualGarden
             }
 
         }
+
+        public bool[,] GetCurrentPosOfWeed()
+        {
+            bool[,] currentWeedPositions = new bool[grid.GetLength(0), grid.GetLength(1)];
+            for (int i = 0; i < grid.GetLength(0); i++)
+            {
+                for (int j = 0; j < grid.GetLength(1); j++)
+                {
+                    currentWeedPositions[i, j] = GetTile(i, j).HasWeed;
+                }
+            }
+            return currentWeedPositions;
+        }
+
+        //Takes each tile in the grid without weed and tries spreading weed to it from adjacent tiles with weed
+        public void TrySpreadingWeed()
+        {
+            foreach (Tile tile in grid)
+            {
+                if (!tile.HasWeed)
+                {
+                    var adjacentIndexes = GetIndexesOfAdjacentTiles(tile.Row, tile.Column);
+                    foreach ((int, int) index in adjacentIndexes)
+                    {
+                        if (GetTile(index).HasWeed)
+                        tile.TrySpreadingWeed();
+                    }
+                }
+            }
+        }
+
         public List<(int, int)> GetIndexesOfAdjacentTiles(int row, int column)
         {
             List<(int, int)> adjacentIndexes = new List<(int, int)>();
@@ -144,6 +159,11 @@ namespace VirtualGarden
                 }
             }
             return adjacentIndexes;
+        }
+
+        public List<(int, int)> GetIndexesOfAdjacentTiles((int, int) pos)
+        {
+            return GetIndexesOfAdjacentTiles(pos.Item1, pos.Item2);
         }
     }
 }
