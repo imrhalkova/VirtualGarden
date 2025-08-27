@@ -55,7 +55,7 @@ namespace VirtualGarden
         //the chance of weed spreading to this tile if one adjacent tile has weed
         public double WeedSpreadChance { get; private set; } = 0.5;
 
-        public Random rand { get; } = new Random();
+        public IRandomNumberGenerator Rand { get; } = new DefaultRandomGenerator();
 
         //the number of coins the player automatically receives with each new day
         public int NewDayIncome { get; private set; } = 10;
@@ -85,10 +85,12 @@ namespace VirtualGarden
                 }
             }
         }
+
         public Tile GetTile(int i, int j)
         {
             return grid[i, j];
         }
+
         public Tile GetTile((int, int) index)
         {
             return GetTile(index.Item1, index.Item2);
@@ -96,12 +98,54 @@ namespace VirtualGarden
 
         public void Update()
         {
+            UpdateFlowersStates();
+            UpdateExistingBugInfestations();
+            UpdateFlowers();
+            UpdateWateredStateOfTiles();
+            UpdateWeed();
+            TrySpawningBugInfestations();
+            UpdatePlayer();
+        }
+
+        public void UpdateExistingBugInfestations()
+        {
+            foreach (Tile tile in grid)
+            {
+                tile.UpdateBugInfestation();
+            }
+        }
+
+        public void TrySpawningBugInfestations()
+        {
+            foreach (Tile tile in grid)
+            {
+                tile.TrySpawningBugInfestation();
+            }
+        }
+
+        public void UpdateWateredStateOfTiles()
+        {
+            foreach (Tile tile in grid)
+            {
+                tile.IncrementDaysSinceLastWatered();
+            }
+        }
+
+        public void UpdateFlowers()
+        {
             foreach (Tile tile in grid)
             {
                 tile.UpdateFlower();
             }
-            UpdateWeed();
-            Player.Money += NewDayIncome;
+        }
+
+        //Changes the state of fully grown flowers from growing to blooming and the state of faded flowers from blooming to dead
+        public void UpdateFlowersStates()
+        {
+            foreach (Tile tile in grid)
+            {
+                tile.UpdateFlowerState();
+            }
         }
 
         //Updates weed for a new day - tries spreading weed from previous days and spawning new weed to empty tiles
@@ -164,6 +208,11 @@ namespace VirtualGarden
         public List<(int, int)> GetIndexesOfAdjacentTiles((int, int) pos)
         {
             return GetIndexesOfAdjacentTiles(pos.Item1, pos.Item2);
+        }
+
+        public void UpdatePlayer()
+        {
+            Player.Money += NewDayIncome;
         }
     }
 }

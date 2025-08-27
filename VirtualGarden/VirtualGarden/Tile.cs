@@ -73,27 +73,21 @@ namespace VirtualGarden
         {
             if (Flower is not null)
             {
+                KillNotWateredFlower();
+                KillFlowersNotTreatedFromInfestation();
                 switch (Flower.State)
                 {
                     case FlowerState.Growing:
-                        if (this.DaysSinceLastWatered <= Flower.FlowerType.DaysBetweenWatering && !HasWeed)
+                        if (!HasWeed && Bugs is null)
                         {
                             Flower.GrowthDays += 1;
                         }
-                        if (Flower.GrowthDays == Flower.FlowerType.GrowthDays)
-                        {
-                            Flower.State = FlowerState.Blooming;
-                        }
                         break;
                     case FlowerState.Blooming:
-                        if (Flower.BloomDays < Flower.FlowerType.BloomDays && !HasWeed)
+                        if (Flower.BloomDays < Flower.FlowerType.BloomDays && !HasWeed && Bugs is null)
                         {
                             HasCoins = true;
                             Flower.BloomDays += 1;
-                        }
-                        if (Flower.BloomDays == Flower.FlowerType.BloomDays)
-                        {
-                            Flower.State = FlowerState.Dead;
                         }
                         break;
                     case FlowerState.Dead:
@@ -101,9 +95,24 @@ namespace VirtualGarden
                 }
             }
         }
+
+        public void UpdateFlowerState()
+        {
+            if (Flower is not null)
+            {
+                if (Flower.State == FlowerState.Growing && Flower.GrowthDays == Flower.FlowerType.GrowthDays)
+                {
+                    Flower.State = FlowerState.Blooming;
+                }
+                else if (Flower.State == FlowerState.Blooming && Flower.BloomDays == Flower.FlowerType.BloomDays)
+                {
+                    Flower.State = FlowerState.Dead;
+                }
+            }
+        }
         public void TrySpawningWeed()
         {
-            if (Flower is null && _garden.rand.NextDouble() <= _garden.WeedChance)
+            if (Flower is null && _garden.Rand.NextDouble() <= _garden.WeedChance)
             {
                 HasWeed = true;
             }
@@ -111,9 +120,52 @@ namespace VirtualGarden
         }
         public void TrySpreadingWeed()
         {
-            if (_garden.rand.NextDouble() <= _garden.WeedSpreadChance)
+            if (_garden.Rand.NextDouble() <= _garden.WeedSpreadChance)
             {
                 HasWeed = true;
+            }
+        }
+
+        public void IncrementDaysSinceLastWatered()
+        {
+            DaysSinceLastWatered += 1;
+        }
+
+        public void TrySpawningBugInfestation()
+        {
+            if (Flower is not null && Flower.State != FlowerState.Dead && this.Bugs is null && _garden.Rand.NextDouble() <= _garden.BugsChance)
+            {
+                SpawnABugInfestation();
+            }
+        }
+
+        public void SpawnABugInfestation()
+        {
+            //TO DO
+        }
+
+        public void KillNotWateredFlower()
+        {
+            if (DaysSinceLastWatered > Flower.FlowerType.DaysBetweenWatering)
+            {
+                Flower.State = FlowerState.Dead;
+            }
+        }
+
+        public void KillFlowersNotTreatedFromInfestation()
+        {
+            if (Bugs is not null && Bugs.DaysUntilFlowerDies == 0)
+            {
+                Flower.State = FlowerState.Dead;
+                Bugs = null;
+            }
+        }
+
+        public void UpdateBugInfestation()
+        {
+            if (Bugs is not null)
+            {
+                Bugs.DaysUntilFlowerDies -= 1;
             }
         }
     }
