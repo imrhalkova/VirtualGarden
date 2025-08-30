@@ -12,6 +12,7 @@ namespace VirtualGarden
         //a grid of tiles in which the user can grow flowers
         Tile[,] grid;
 
+        //an instance of the Player class containing the current players info (amount of coins, statistics, ...)
         public Player Player {  get; private set; }
 
         //the chance of a weed spawning on an empty tile with no active event affecting weed spawning
@@ -101,12 +102,22 @@ namespace VirtualGarden
             UpdateFlowersStates();
             UpdateExistingBugInfestations();
             UpdateFlowers();
-            UpdateWateredStateOfTiles();
+            UpdateWateredStateOfFlowers();
             UpdateWeed();
             TrySpawningBugInfestations();
             UpdatePlayer();
         }
 
+        //Changes the state of fully grown flowers from growing to blooming and the state of faded flowers from blooming to dead.
+        public void UpdateFlowersStates()
+        {
+            foreach (Tile tile in grid)
+            {
+                tile.UpdateFlowerState();
+            }
+        }
+
+        //Lowers the countdowns until flowers die from their current bug infestations.
         public void UpdateExistingBugInfestations()
         {
             foreach (Tile tile in grid)
@@ -115,22 +126,8 @@ namespace VirtualGarden
             }
         }
 
-        public void TrySpawningBugInfestations()
-        {
-            foreach (Tile tile in grid)
-            {
-                tile.TrySpawningBugInfestation();
-            }
-        }
-
-        public void UpdateWateredStateOfTiles()
-        {
-            foreach (Tile tile in grid)
-            {
-                tile.IncrementDaysSinceLastWatered();
-            }
-        }
-
+        /*Sets the state of flowers not watered for too long and flowers not treated from bugs for too long to dead.
+         * Updates growth days and bloom days of flowers that are not affected by weed or bugs. */
         public void UpdateFlowers()
         {
             foreach (Tile tile in grid)
@@ -139,12 +136,12 @@ namespace VirtualGarden
             }
         }
 
-        //Changes the state of fully grown flowers from growing to blooming and the state of faded flowers from blooming to dead
-        public void UpdateFlowersStates()
+        //Updates the number of days since the flower was last watered.
+        public void UpdateWateredStateOfFlowers()
         {
             foreach (Tile tile in grid)
             {
-                tile.UpdateFlowerState();
+                tile.UpdateWateredStateOfFlower();
             }
         }
 
@@ -159,6 +156,38 @@ namespace VirtualGarden
             {
                 tile.TrySpawningWeed();
             }
+        }
+
+        //Tries spawning new bug infestations on tiles with live flowers without bug infestations.
+        public void TrySpawningBugInfestations()
+        {
+            foreach (Tile tile in grid)
+            {
+                if (tile.CanSpawnBugs())
+                {
+                    if (Rand.NextDouble() <= BugsChance)
+                    {
+                        SpawnInfestation(tile);
+                    }
+                }
+            }
+        }
+
+        //Updates player's info for a new day.
+        public void UpdatePlayer()
+        {
+            Player.Money += NewDayIncome;
+        }
+
+        public void SpawnInfestation(Tile tile)
+        {
+            if (tile.Flower is null)
+            {
+                throw new FlowerNotPresentException($"Cannot spawn bugs on tile [{tile.Row}, {tile.Column}]. No flower present on this tile.");
+            }
+            var bugWeights = tile.Flower.FlowerType.BugWeights;
+            Bugs bugs = WeightedRandom.ChooseWeightedRandom<Bugs, BugsWeight<Bugs>>(bugWeights, Rand);
+            tile.SpawnBugInfestation(new BugInfestation(bugs));
 
         }
 
@@ -191,7 +220,6 @@ namespace VirtualGarden
                 }
             }
         }
-
         public List<(int, int)> GetIndexesOfAdjacentTiles(int row, int column)
         {
             List<(int, int)> adjacentIndexes = new List<(int, int)>();
@@ -209,10 +237,6 @@ namespace VirtualGarden
         {
             return GetIndexesOfAdjacentTiles(pos.Item1, pos.Item2);
         }
-
-        public void UpdatePlayer()
-        {
-            Player.Money += NewDayIncome;
-        }
+         
     }
 }

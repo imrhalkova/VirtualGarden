@@ -14,23 +14,26 @@ namespace VirtualGarden
         public int Column { get; private set; }
         public PlantedFlower? Flower {  get; private set; }
         public bool HasWeed {  get; set; } = false;
-        public Bugs? Bugs { get; set; }
+        public BugInfestation? Bugs { get; set; }
         public bool HasCoins { get; set; } = false;
-        public int DaysSinceLastWatered { get; set; }
 
         public Tile(Garden garden, int row, int column)
         {
             _garden = garden;
-            DaysSinceLastWatered = -1;
             Row = row;
             Column = column;
+        }
+
+        public string PrintCoordinates()
+        {
+            return $"[{Row}, {Column}]";
         }
 
         public void PlantFlower(Flower flower)
         {
             if (Flower is not null)
             {
-                throw new FlowerAlreadyPresentException();
+                throw new FlowerAlreadyPresentException($"Cannot plant flower on tile {PrintCoordinates()}. There is already a flower present on this tile.");
             }
             Flower = new PlantedFlower(flower);
         }
@@ -39,7 +42,7 @@ namespace VirtualGarden
         {
             if (Flower is null)
             {
-                throw new FlowerNotPresentException();
+                throw new FlowerNotPresentException($"Cannot remove flower from tile {PrintCoordinates()}. There is no flower on this tile.");
             }
             Flower = null;
         }
@@ -47,14 +50,16 @@ namespace VirtualGarden
         public void WaterTile()
         {
             if (Flower is not null)
-            this.DaysSinceLastWatered = 0;
+            {
+                Flower.DaysSinceLastWatered = 0;
+            }
         }
 
         public void RemoveWeed()
         {
             if (!HasWeed)
             {
-                throw new WeedNotPresentException();
+                throw new WeedNotPresentException($"Cannot remove weed on tile {PrintCoordinates()}. There is no weed on this tile.");
             }
             HasWeed = false;
         }
@@ -63,7 +68,7 @@ namespace VirtualGarden
         {
             if (!HasCoins)
             {
-                throw new CoinsNotPresentException();
+                throw new CoinsNotPresentException($"Cannot collect coins on tile {PrintCoordinates()}. There are no coins on this tile.");
             }
             _garden.Player.Money += Flower.FlowerType.DailyBloomIncome;
             HasCoins = false;
@@ -126,27 +131,36 @@ namespace VirtualGarden
             }
         }
 
-        public void IncrementDaysSinceLastWatered()
+        public void UpdateWateredStateOfFlower()
         {
-            DaysSinceLastWatered += 1;
-        }
-
-        public void TrySpawningBugInfestation()
-        {
-            if (Flower is not null && Flower.State != FlowerState.Dead && this.Bugs is null && _garden.Rand.NextDouble() <= _garden.BugsChance)
+            if (Flower is null)
             {
-                SpawnABugInfestation();
+                throw new FlowerNotPresentException($"Cannot update water state of flower on tile {PrintCoordinates()}. There is no flower on this tile.");
             }
+            Flower.DaysSinceLastWatered += 1;
         }
 
-        public void SpawnABugInfestation()
+        public bool CanSpawnBugs()
         {
-            //TO DO
+            return Flower is not null && Flower.State != FlowerState.Dead && this.Bugs is null;
+        }
+
+        public void SpawnBugInfestation(BugInfestation bugs)
+        {
+            if (Bugs is not null)
+            {
+                throw new BugsAlreadyPresent($"Cannot spawn new bugs on tile {PrintCoordinates()}. This tile already has bugs.");
+            }
+            Bugs = bugs;
         }
 
         public void KillNotWateredFlower()
         {
-            if (DaysSinceLastWatered > Flower.FlowerType.DaysBetweenWatering)
+            if (Flower is null)
+            {
+                throw new FlowerNotPresentException($"Cannot set the state of flower on tile {PrintCoordinates()} to dead. There is no flower on this tile.");
+            }
+            if (Flower.DaysSinceLastWatered > Flower.FlowerType.DaysBetweenWatering)
             {
                 Flower.State = FlowerState.Dead;
             }
@@ -154,6 +168,10 @@ namespace VirtualGarden
 
         public void KillFlowersNotTreatedFromInfestation()
         {
+            if (Flower is null)
+            {
+                throw new FlowerNotPresentException($"Cannot set the state of flower on tile {PrintCoordinates()} to dead. There is no flower on this tile.");
+            }
             if (Bugs is not null && Bugs.DaysUntilFlowerDies == 0)
             {
                 Flower.State = FlowerState.Dead;
@@ -163,10 +181,11 @@ namespace VirtualGarden
 
         public void UpdateBugInfestation()
         {
-            if (Bugs is not null)
+            if (Bugs is null)
             {
-                Bugs.DaysUntilFlowerDies -= 1;
+                throw new BugsNotPresent($"Cannot update bug infestation on tile {PrintCoordinates()}. This tile has no bugs.");
             }
+            Bugs.Update();
         }
     }
 }

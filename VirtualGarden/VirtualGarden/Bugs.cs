@@ -57,16 +57,21 @@ namespace VirtualGarden
             Bugs = bugs;
             DaysUntilFlowerDies = bugs.DaysUntilFlowerDies;
         }
-    }
 
-    public class BugWeight
+        public void Update()
+        {
+            DaysUntilFlowerDies -= 1;
+        }
+    }
+    
+    public class BugsWeight<Bugs> : IWeightedItem<Bugs>
     {
-        public Bugs BugType { get; private set; }
+        public Bugs Item { get; private set; }
         public int Weight { get; private set; }
 
-        public BugWeight(Bugs bugs, int weight)
+        public BugsWeight(Bugs bugs, int weight)
         {
-            BugType = bugs;
+            Item = bugs;
             Weight = weight;
         }
     }

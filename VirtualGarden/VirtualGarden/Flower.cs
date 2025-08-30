@@ -10,13 +10,23 @@ namespace VirtualGarden
     {
         public string Name { get; private set; }
         public int SeedPrice { get; private set; }
-        public int DaysBetweenWatering { get; private set; }
-        public int GrowthDays { get; private set; }
-        public int BloomDays { get; private set; }
-        public int DailyBloomIncome { get; private set; }
-        public abstract List<BugWeight> BugWeights { get; }
 
-        //Maximum number of coins gained from the flower if it is not destroyed prematurely and the player collects coins from it every day
+        //The number of days this flower can go without being watered.
+        public int DaysBetweenWatering { get; private set; }
+
+        //The number of days this flower takes to get into blooming state when conditions for growth are met each day.
+        public int GrowthDays { get; private set; }
+
+        //The number of days this flower blooms and produces coins when conditions for blooming are met each day.
+        public int BloomDays { get; private set; }
+
+        //The number of coins this flower produces in one day while blooming.
+        public int DailyBloomIncome { get; private set; }
+
+        //A list of weights for each bug type signifying how likely is that bugtype to be in a bug infestation on this flower.
+        public abstract List<BugsWeight<Bugs>> BugWeights { get; }
+
+        //Maximum number of coins gained from the flower if it is not destroyed prematurely and the player collects coins from it every day.
         public int MaximumIncome
         {
             get
@@ -38,72 +48,72 @@ namespace VirtualGarden
 
     public class Daisy : Flower
     {
-        public override List<BugWeight> BugWeights { get; } = new List<BugWeight>
+        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         { 
-            new BugWeight(BugTypes.CommonBugs, 10),
-            new BugWeight(BugTypes.GardenBugs, 0),
-            new BugWeight(BugTypes.ExoticBugs, 0),
-            new BugWeight(BugTypes.TropicalBugs, 0),
+            new BugsWeight<Bugs>(BugTypes.CommonBugs, 10),
+            new BugsWeight<Bugs>(BugTypes.GardenBugs, 0),
+            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
+            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
         };
         public Daisy() : base("Daisy", 5, 0, 5, 3, 5) { }
     }
 
     public class Marigold : Flower
     {
-        public override List<BugWeight> BugWeights { get; } = new List<BugWeight>
+        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         {
-            new BugWeight(BugTypes.CommonBugs, 10),
-            new BugWeight(BugTypes.GardenBugs, 0),
-            new BugWeight(BugTypes.ExoticBugs, 0),
-            new BugWeight(BugTypes.TropicalBugs, 0),
+            new BugsWeight<Bugs>(BugTypes.CommonBugs, 10),
+            new BugsWeight<Bugs>(BugTypes.GardenBugs, 0),
+            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
+            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
         };
         public Marigold() : base("Marigold", 20, 1, 6, 6, 5) { }
     }
 
     public class Sunflower : Flower
     {
-        public override List<BugWeight> BugWeights { get; } = new List<BugWeight>
+        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         {
-            new BugWeight(BugTypes.CommonBugs, 9),
-            new BugWeight(BugTypes.GardenBugs, 1),
-            new BugWeight(BugTypes.ExoticBugs, 0),
-            new BugWeight(BugTypes.TropicalBugs, 0),
+            new BugsWeight<Bugs>(BugTypes.CommonBugs, 9),
+            new BugsWeight<Bugs>(BugTypes.GardenBugs, 1),
+            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
+            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
         };
         public Sunflower() : base("Sunflower", 50, 2, 8, 10, 13) { }
     }
 
     public class Petunia : Flower
     {
-        public override List<BugWeight> BugWeights { get; } = new List<BugWeight>
+        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         {
-            new BugWeight(BugTypes.CommonBugs, 8),
-            new BugWeight(BugTypes.GardenBugs, 2),
-            new BugWeight(BugTypes.ExoticBugs, 0),
-            new BugWeight(BugTypes.TropicalBugs, 0),
+            new BugsWeight<Bugs>(BugTypes.CommonBugs, 8),
+            new BugsWeight<Bugs>(BugTypes.GardenBugs, 2),
+            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
+            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
         };
         public Petunia() : base("Petunia", 80, 1, 9, 10, 20) { }
     }
 
     public class Rose : Flower
     {
-        public override List<BugWeight> BugWeights { get; } = new List<BugWeight>
+        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         {
-            new BugWeight(BugTypes.CommonBugs, 2),
-            new BugWeight(BugTypes.GardenBugs, 6),
-            new BugWeight(BugTypes.ExoticBugs, 1),
-            new BugWeight(BugTypes.TropicalBugs, 1),
+            new BugsWeight<Bugs>(BugTypes.CommonBugs, 2),
+            new BugsWeight<Bugs>(BugTypes.GardenBugs, 6),
+            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 1),
+            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 1),
         };
         public Rose() : base("Rose", 300, 0, 20, 5, 180) { }
     }
 
     public class Tulip : Flower
     {
-        public override List<BugWeight> BugWeights { get; } = new List<BugWeight>
+        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         {
-            new BugWeight(BugTypes.CommonBugs, 2),
-            new BugWeight(BugTypes.GardenBugs, 6),
-            new BugWeight(BugTypes.ExoticBugs, 0),
-            new BugWeight(BugTypes.TropicalBugs, 2),
+            new BugsWeight<Bugs>(BugTypes.CommonBugs, 2),
+            new BugsWeight<Bugs>(BugTypes.GardenBugs, 6),
+            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
+            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 2),
         };
         public Tulip() : base("Tulip", 500, 1, 12, 8, 130) { }
     }
@@ -127,12 +137,15 @@ namespace VirtualGarden
 
         public FlowerState State { get; set; }
 
+        public int DaysSinceLastWatered { get; set;}
+
         public PlantedFlower(Flower flower)
         {
             FlowerType = flower;
             GrowthDays = 0;
             BloomDays = 0;
             State = FlowerState.Growing;
+            DaysSinceLastWatered = -1;
         }
     }
 

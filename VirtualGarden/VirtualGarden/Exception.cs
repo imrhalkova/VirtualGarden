@@ -13,23 +13,38 @@ namespace VirtualGarden
 
     public class WeedNotPresentException : GardenException
     {
-        public WeedNotPresentException() : base("There is no weed on this tile.") { }
+        public WeedNotPresentException(string message) : base(message) { }
     }
 
     
     public class FlowerNotPresentException : GardenException
     {
-        public FlowerNotPresentException() : base("There is no flower on this tile.") { }
+        public FlowerNotPresentException(string message) : base(message) { }
     }
 
     public class FlowerAlreadyPresentException : GardenException
     {
-        public FlowerAlreadyPresentException() : base("There is already a flower on this tile") { }
+        public FlowerAlreadyPresentException(string message) : base(message) { }
     }
 
     public class CoinsNotPresentException : GardenException
     {
-        public CoinsNotPresentException() : base("There are no coins on this tile") { }
+        public CoinsNotPresentException(string message) : base(message) { }
+    }
+
+    public class FailedRandomItemSelectionException : GardenException
+    {
+        public FailedRandomItemSelectionException(string message) : base(message) { }
+    }
+
+    public class BugsAlreadyPresent : GardenException
+    {
+        public BugsAlreadyPresent(string message) : base(message) { }
+    }
+
+    public class BugsNotPresent : GardenException
+    {
+        public BugsNotPresent(string message) : base(message) { }
     }
     
 }
