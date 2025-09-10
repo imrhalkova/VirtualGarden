@@ -62,6 +62,29 @@ namespace VirtualGarden
         {
             DaysUntilFlowerDies -= 1;
         }
+
+        public bool IsEqual(BugInfestation other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+            return Bugs == other.Bugs &&
+                DaysUntilFlowerDies == other.DaysUntilFlowerDies;
+        }
+
+        public static bool IsEqual(BugInfestation bugs1, BugInfestation bugs2)
+        {
+            if (bugs1 is null &&  bugs2 is null)
+            {
+                return true;
+            }
+            if (bugs1 is null || bugs2 is null)
+            {
+                return false;
+            }
+            return bugs1.Equals(bugs2);
+        }
     }
     
     public class BugsWeight<Bugs> : IWeightedItem<Bugs>

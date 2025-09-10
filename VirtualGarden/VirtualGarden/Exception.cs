@@ -37,14 +37,18 @@ namespace VirtualGarden
         public FailedRandomItemSelectionException(string message) : base(message) { }
     }
 
-    public class BugsAlreadyPresent : GardenException
+    public class BugsAlreadyPresentException : GardenException
     {
-        public BugsAlreadyPresent(string message) : base(message) { }
+        public BugsAlreadyPresentException(string message) : base(message) { }
     }
 
-    public class BugsNotPresent : GardenException
+    public class BugsNotPresentException : GardenException
     {
-        public BugsNotPresent(string message) : base(message) { }
+        public BugsNotPresentException(string message) : base(message) { }
     }
-    
+
+    public class TileIndexOutOfRangeException : GardenException
+    {
+        public TileIndexOutOfRangeException(string message) : base(message) { }
+    }
 }

@@ -6,15 +6,21 @@ using System.Threading.Tasks;
 
 namespace VirtualGarden
 {
+    /*The abstract class from which all Flowers inherit.
+     The Flower classes consist of info that is same for all instances of said flower.*/
     public abstract class Flower
     {
+        //The name of this flower
         public string Name { get; private set; }
+
+        //The amount of money needed to buy seeds of this flower
         public int SeedPrice { get; private set; }
 
         //The number of days this flower can go without being watered.
         public int DaysBetweenWatering { get; private set; }
 
-        //The number of days this flower takes to get into blooming state when conditions for growth are met each day.
+        /*The number of days this flower takes to get into blooming state when conditions for growth are met each day.
+         Including the day the flower was planted*/
         public int GrowthDays { get; private set; }
 
         //The number of days this flower blooms and produces coins when conditions for blooming are met each day.
@@ -118,25 +124,34 @@ namespace VirtualGarden
         public Tulip() : base("Tulip", 500, 1, 12, 8, 130) { }
     }
 
+    //The FlowerTypes class contains instances of all flowers that inherit from Flower
     public static class FlowerTypes
     {
-        static Flower Daisy = new Daisy();
-        static Flower Marigold = new Marigold();
-        static Flower Sunflower = new Sunflower();
-        static Flower Petunia = new Petunia();
-        static Flower Rose = new Rose();
-        static Flower Peonies = new Tulip();
+        public static Flower Daisy = new Daisy();
+        public static Flower Marigold = new Marigold();
+        public static Flower Sunflower = new Sunflower();
+        public static Flower Petunia = new Petunia();
+        public static Flower Rose = new Rose();
+        public static Flower Peonies = new Tulip();
     }
 
+    //The PlantedFlower class contains info specific to instances of a flower planted
     public class PlantedFlower
     {
+        //The type of which this flower is (e.g. Daisy, Rose), contains info that is the same for every flower of this type
         public Flower FlowerType { get; private set; }
+
+        //The number of days this flower has grown
         public int GrowthDays { get; set; }
 
+        //The number of days this flower has already bloomed and produced income
         public int BloomDays { get; set; }
 
+        //The current state of this planted flower
         public FlowerState State { get; set; }
 
+        /*Number of days the flower has not been watered. Starts at 1 after being planted because
+        DaysSinceLastWatered is updated after the flower states so that flowers are properly killed.*/
         public int DaysSinceLastWatered { get; set;}
 
         public PlantedFlower(Flower flower)
@@ -145,10 +160,37 @@ namespace VirtualGarden
             GrowthDays = 0;
             BloomDays = 0;
             State = FlowerState.Growing;
-            DaysSinceLastWatered = -1;
+            DaysSinceLastWatered = 1;
+        }
+
+        public bool IsEqual(PlantedFlower other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+            return FlowerType == other.FlowerType &&
+                GrowthDays == other.GrowthDays &&
+                BloomDays == other.BloomDays &&
+                State == other.State &&
+                DaysSinceLastWatered == other.DaysSinceLastWatered;
+        }
+
+        public static bool IsEqual(PlantedFlower flower1, PlantedFlower flower2)
+        {
+            if (flower1 is null && flower2 is null)
+            {
+                return true;
+            }
+            if (flower1 is null || flower2 is null)
+            {
+                return false;
+            }
+            return flower1.IsEqual(flower2);
         }
     }
 
+    //The possible states a planted flower can be in
     public enum FlowerState
     {
         Growing,
