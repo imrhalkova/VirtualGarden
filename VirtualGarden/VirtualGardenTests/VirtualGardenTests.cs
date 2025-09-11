@@ -27,11 +27,11 @@ namespace VirtualGardenTests
             int dailyIncome = 20;
             int startingMoney = 0;
 
-            Garden garden = new Garden(1, 1, new Player(startingMoney), 0, 0, dailyIncome, false);
+            Garden garden = new Garden(1, 1, new Player(startingMoney, dailyIncome), 0, 0, dailyIncome, false);
 
-            garden.Update();
+            garden.NewDay();
 
-            Assert.Equal(startingMoney + dailyIncome, garden.Player.Money);
+            Assert.Equal(startingMoney + dailyIncome, garden.Player.Coins);
         }
 
         [Fact]
@@ -56,8 +56,8 @@ namespace VirtualGardenTests
             garden.PlantFlower(0, 0, new TestFlower1());
 
             Assert.Equal(FlowerState.Growing, garden.GetTile(0, 0).Flower.State);
-            garden.WaterTile(garden.GetTile(0, 0));
-            garden.Update();
+            garden.WaterFlower(garden.GetTile(0, 0));
+            garden.NewDay();
 
             Assert.Equal(FlowerState.Blooming, garden.GetTile(0, 0).Flower.State);
         }
@@ -69,7 +69,7 @@ namespace VirtualGardenTests
 
             garden.PlantFlower(0, 0, new TestFlower1());
 
-            garden.Update();
+            garden.NewDay();
 
             Assert.Equal(FlowerState.Dead, garden.GetTile(0, 0).Flower.State);
         }
@@ -85,7 +85,7 @@ namespace VirtualGardenTests
             garden.GetTile(0, 0).SpawnWeed();
             garden.PlantFlower(0, 0, new TestFlower1());
             garden.WaterTile(0, 0);
-            garden.Update();
+            garden.NewDay();
 
             Assert.Equal(FlowerState.Growing, garden.GetTile(0, 0).Flower.State);
         }
@@ -99,12 +99,12 @@ namespace VirtualGardenTests
             for (int i = 0; i < FlowerTypes.Daisy.GrowthDays; i++)
             {
                 garden.WaterTile(0, 0);
-                garden.Update();
+                garden.NewDay();
             }
             int previousBloomDays = garden.GetTile(0, 0).Flower.BloomDays;
             garden.GetTile(0, 0).SpawnWeed();
             garden.WaterTile(0, 0);
-            garden.Update();
+            garden.NewDay();
 
             Assert.Equal(previousBloomDays, garden.GetTile(0, 0).Flower.BloomDays);
             Assert.Equal(0, garden.GetTile(0, 0).Coins);
@@ -117,7 +117,7 @@ namespace VirtualGardenTests
             List<double> doublesToBeGenerated = new List<double>() { weedSpawnChance - 0.1 };
             IRandomNumberGenerator random = new FakeRandomGenerator(doublesToBeGenerated);
             Garden garden = new Garden(1, 1, new Player(), weedSpawnChance, 0, 0, false, random);
-            garden.Update();
+            garden.NewDay();
 
             Assert.Equal(true, garden.GetTile(0, 0).HasWeed);
         }
@@ -129,7 +129,7 @@ namespace VirtualGardenTests
             List<double> doublesToBeGenerated = new List<double>() { weedSpawnChance + 0.1 };
             IRandomNumberGenerator random = new FakeRandomGenerator(doublesToBeGenerated);
             Garden garden = new Garden(1, 1, new Player(), weedSpawnChance, 0, 0, false, random);
-            garden.Update();
+            garden.NewDay();
 
             Assert.Equal(false, garden.GetTile(0, 0).HasWeed);
         }
@@ -142,7 +142,7 @@ namespace VirtualGardenTests
             IRandomNumberGenerator random = new FakeRandomGenerator(doublesToBeGenerated);
             Garden garden = new Garden(1, 1, new Player(), weedSpawnChance, 0, 0, false, random);
             garden.GetTile(0, 0).PlantFlower(FlowerTypes.Petunia);
-            garden.Update();
+            garden.NewDay();
 
             Assert.Equal(false, garden.GetTile(0, 0).HasWeed);
         }
@@ -155,7 +155,7 @@ namespace VirtualGardenTests
             IRandomNumberGenerator random = new FakeRandomGenerator(doublesToBeGenerated);
             Garden garden = new Garden(1, 2, new Player(), weedSpawnChance, 0, 0, false, random);
             garden.GetTile(0, 0).SpawnWeed();
-            garden.Update();
+            garden.NewDay();
 
             Assert.Equal(true, garden.GetTile(0, 1).HasWeed);
         }
@@ -168,7 +168,7 @@ namespace VirtualGardenTests
             IRandomNumberGenerator random = new FakeRandomGenerator(doublesToBeGenerated);
             Garden garden = new Garden(1, 3, new Player(), weedSpawnChance, 0, 0, false, random);
             garden.GetTile(0, 0).SpawnWeed();
-            garden.Update();
+            garden.NewDay();
 
             Assert.Equal(false, garden.GetTile(0, 2).HasWeed);
         }

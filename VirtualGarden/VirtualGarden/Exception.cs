@@ -8,47 +8,76 @@ namespace VirtualGarden
 {
     public class GardenException : Exception
     {
-        public GardenException(string message) : base(message) { }
+        internal GardenException(string message) : base(message) { }
     }
 
     public class WeedNotPresentException : GardenException
     {
-        public WeedNotPresentException(string message) : base(message) { }
+        internal WeedNotPresentException(string message) : base(message) { }
     }
 
-    
     public class FlowerNotPresentException : GardenException
     {
-        public FlowerNotPresentException(string message) : base(message) { }
+        internal FlowerNotPresentException(string message) : base(message) { }
     }
 
     public class FlowerAlreadyPresentException : GardenException
     {
-        public FlowerAlreadyPresentException(string message) : base(message) { }
+        internal FlowerAlreadyPresentException(string message) : base(message) { }
     }
 
     public class CoinsNotPresentException : GardenException
     {
-        public CoinsNotPresentException(string message) : base(message) { }
+        internal CoinsNotPresentException(string message) : base(message) { }
     }
 
     public class FailedRandomItemSelectionException : GardenException
     {
-        public FailedRandomItemSelectionException(string message) : base(message) { }
+        internal FailedRandomItemSelectionException(string message) : base(message) { }
     }
 
     public class BugsAlreadyPresentException : GardenException
     {
-        public BugsAlreadyPresentException(string message) : base(message) { }
+        internal BugsAlreadyPresentException(string message) : base(message) { }
     }
 
     public class BugsNotPresentException : GardenException
     {
-        public BugsNotPresentException(string message) : base(message) { }
+        internal BugsNotPresentException(string message) : base(message) { }
     }
 
     public class TileIndexOutOfRangeException : GardenException
     {
-        public TileIndexOutOfRangeException(string message) : base(message) { }
+        internal TileIndexOutOfRangeException(string message) : base(message) { }
+    }
+
+    public class NoWaterLeftException : GardenException
+    {
+        internal NoWaterLeftException(string message) : base(message) { }
+    }
+
+    public class BrokenToolsException : GardenException
+    {
+        internal BrokenToolsException(string message) : base(message) { }
+    }
+
+    public class InsufficientFundsException : GardenException
+    {
+        internal InsufficientFundsException(string message) : base(message) { }
+    }
+
+    public class KillingAlreadyDeadFlowerException : Exception
+    {
+        internal KillingAlreadyDeadFlowerException(string message) : base(message) { }
+    }
+
+    public class KillingAlreadyDeadRabbitException : Exception
+    {
+        internal KillingAlreadyDeadRabbitException(string message) : base(message) { }
+    }
+
+    public class WildRabbitEventNotActiveException : Exception
+    {
+        internal WildRabbitEventNotActiveException(string message) : base(message) { }
     }
 }

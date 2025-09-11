@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace VirtualGarden
 {
+    /// <summary>
+    /// Represents the virtual garden. It contains the whole game.
+    /// </summary>
     public class Garden
     {
         //a grid of tiles in which the user can grow flowers
@@ -15,79 +18,105 @@ namespace VirtualGarden
         //an instance of the Player class containing the current players info (amount of coins, statistics, ...)
         public Player Player {  get; private set; }
 
-        //the chance of a weed spawning on an empty tile with no active event affecting weed spawning
+        //The probability that weeds will be spawned on one empty tile the next day with no active event affecting weed spawning.
         private double _normalWeedChance = 0.3;
 
-        //the chance of a weed spawning on an empty tile with an active event affecting weed spawning
-        double? EventWeedChance { get; set; } = null;
-
-        //the probability actually used for spawning weeds on empty tiles
+        /// <summary>
+        /// The probability that weeds will be spawned on one empty tile the next day.
+        /// </summary>
         public double WeedChance
         {
             get
             {
-                if (EventWeedChance is null)
+                if (_event is HighTemperature highTemperature)
                 {
-                    return _normalWeedChance;
+                    return _normalWeedChance * highTemperature.WeedChanceMultiply;
                 }
-                return (double)EventWeedChance;
+                return _normalWeedChance;
             }
         }
 
-        //the chance of bugs spawning on a tile with a flower with no active event affecting bugs spawning
+        //The probability that a bug infestation will be spawned on one tile with a flower the next day with no active event affecting bugs spawning.
         private double _normalBugsChance = 0.05;
 
-        //the chance of bugs spawning on a tile with a flower with an active event affecting bugs spawning
-        double? EventBugsChance { get; set; } = null;
-
-        //the probability actually used for spawning bugs on tiles with flowers
+        /// <summary>
+        /// The probability that a bug infestation will be spawned on one tile with a flower the next day.
+        /// </summary>
         public double BugsChance
         {
             get
             {
-                if (EventBugsChance is null)
+                if (_event is HumidWeatherEvent humidWeatherEvent)
                 {
-                    return _normalBugsChance;
+                    return _normalBugsChance * humidWeatherEvent.BugChanceMultiply;
                 }
-                return (double)EventBugsChance;
+                return _normalBugsChance;
             }
         }
 
-        //the chance of weed spreading to this tile if one adjacent tile has weed
+        /// <summary>
+        /// The probability of weed spreading to this tile if one adjacent tile has weed.
+        /// </summary>
         public double WeedSpreadChance { get; private set; } = 0.5;
 
+        /*A random number generator used for making decisions in the garden that have certain probabilities - spawning and spreading
+        of weed, spawning and picking insects, events generating.*/
         public IRandomNumberGenerator Rand { get; } = new DefaultRandomGenerator();
 
-        //the number of coins the player automatically receives with each new day
-        public int NewDayIncome { get; private set; } = 10;
+        //Enables/Disables events in the game.
+        private bool _eventsEnabled = false;
 
-        //Enables/Disables events.
-        public bool EventsEnabled = false;
+        //The current active event or null if no event is currently active.
+        private Event? _event;
+
+        /// <summary>
+        /// The probability of a random event starting on a day with no active event.
+        /// </summary>
+        public double EventChance { get; private set; } = 0.2;
+
+        /// <summary>
+        /// The number of flowers currently planted in the garden that are alive (growing or blooming).
+        /// </summary>
+        public int FlowerCount
+        {
+            get
+            {
+                int count = 0;
+                foreach (Tile tile in Grid)
+                {
+                    if (tile.Flower is not null && tile.Flower.State != FlowerState.Dead)
+                    {
+                        count++;
+                    }
+                }
+                return count;
+            }
+        }
 
         public Garden(int rows, int columns, Player player) 
         {
             InitializeGrid(rows, columns);
             Player = player;
         }
-        public Garden(int rows, int columns, Player player, double weedChance, double bugsChance, int newDayIncome, bool eventsEnabled)
+        public Garden(int rows, int columns, Player player, double weedChance, double bugsChance, double eventChance, bool eventsEnabled)
         {
             InitializeGrid(rows, columns);
             Player = player;
             _normalWeedChance = weedChance;
             _normalBugsChance = bugsChance;
-            NewDayIncome = newDayIncome;
-            EventsEnabled = eventsEnabled;
+            EventChance = eventChance;
+            _eventsEnabled = eventsEnabled;
         }
 
-        public Garden(int rows, int columns, Player player, double weedChance, double bugsChance, int newDayIncome, bool eventsEnabled, IRandomNumberGenerator randomGenerator)
+        public Garden(int rows, int columns, Player player, double weedChance, double bugsChance, double eventChance, bool eventsEnabled, IRandomNumberGenerator randomGenerator)
         {
             Rand = randomGenerator;
             InitializeGrid(rows, columns);
             Player = player;
             _normalWeedChance = weedChance;
             _normalBugsChance = bugsChance;
-            NewDayIncome = newDayIncome;
-            EventsEnabled = eventsEnabled;
+            EventChance = eventChance;
+            _eventsEnabled = eventsEnabled;
         }
 
         public void InitializeGrid(int rows, int columns)
@@ -117,7 +146,7 @@ namespace VirtualGarden
         }
 
         //Updates the whole garden for a new day
-        public void Update()
+        public void NewDay()
         {
             UpdateExistingBugInfestations();
             UpdateFlowers();
@@ -156,7 +185,16 @@ namespace VirtualGarden
             foreach (Tile tile in Grid)
             {
                 if (tile.Flower is not null)
-                tile.UpdateWateredStateOfFlower();
+                {
+                    if (_event is RainEvent)
+                    {
+                        tile.WaterFlower();
+                    }
+                    else
+                    {
+                        tile.UpdateWateredStateOfFlower();
+                    }  
+                }
             }
         }
 
@@ -192,7 +230,27 @@ namespace VirtualGarden
         //Updates player's info for a new day.
         public void UpdatePlayer()
         {
-            Player.AddMoney(NewDayIncome);
+            Player.Update();
+        }
+
+        public void UpdateEvents()
+        {
+            if (_event is not null)
+            {
+                _event.Update();
+                if (_event.DaysLeft == 0)
+                {
+                    _event = null;
+                }
+            }
+            if (_event is null)
+            {
+                if (Rand.NextDouble() < EventChance)
+                {
+                    //pick a random event
+                }
+            }
+            
         }
 
         public void SpawnInfestation(Tile tile)
@@ -258,6 +316,10 @@ namespace VirtualGarden
         public void PlantFlower(Tile tile, Flower flower)
         {
             tile.PlantFlower(flower);
+            if (_event is RainEvent)
+            {
+                tile.WaterFlower();
+            }
         }
 
         public void PlantFlower(int row, int column, Flower flower)
@@ -276,15 +338,94 @@ namespace VirtualGarden
             CollectCoins(GetTile(row, column));
         }
 
-        public void WaterTile(Tile tile)
+        public void WaterFlower(Tile tile)
         {
-            tile.WaterTile();
+            if (_event is DroughtEvent)
+            {
+                DroughtEvent droughtEvent = (DroughtEvent) _event;
+                if (!droughtEvent.CanWater)
+                {
+                    throw new NoWaterLeftException($"Cannot water flower on tile {tile.PrintCoordinates()}. There is no water left.");
+                }
+                droughtEvent.IncrementNumberOfWateringsDoneToday();
+            }
+            tile.WaterFlower();
+            Player.playerStatistics.FlowersWatered++;
         }
 
         public void WaterTile(int row, int column)
         {
-            WaterTile(GetTile(row, column));
+            WaterFlower(GetTile(row, column));
         }
-         
+
+        public void RemoveWeed(int row, int column)
+        {
+            RemoveWeed(GetTile(row, column));
+        }
+
+        public void RemoveWeed(Tile tile)
+        {
+            if (_event is BrokenToolsEvent)
+            {
+                throw new BrokenToolsException($"Cannot remove weed from tile {tile.PrintCoordinates()}. The tools are broken.");
+            }
+            tile.RemoveWeed();
+        }
+
+        public void PayToRepairTools()
+        {
+            int price = CountToolRepairPrice();
+            if (Player.Coins < price)
+            {
+                throw new InsufficientFundsException($"Cannot repair tools. The player does not have enought money.");
+            }
+            Player.SpendMoney(price);
+            EndEvent();
+        }
+
+        public int CountToolRepairPrice()
+        {
+            return 0;
+        }
+
+        public void EndEvent()
+        {
+            _event = null;
+        }
+
+        public void ChaseTheRabitAway()
+        {
+            if (_event is not WildRabbitEvent)
+            {
+                throw new WildRabbitEventNotActiveException($"Cannot chase the wild rabbit away. It is not in the garden.");
+            }
+            EndEvent();
+        }
+
+        public void KillTheRabit()
+        {
+            if (_event is not WildRabbitEvent)
+            {
+                throw new WildRabbitEventNotActiveException($"Cannot kill the wild rabbit. The wild rabbit is not currently in the garden.");
+            }
+            WildRabbitEvent wildRabbitEvent = (WildRabbitEvent) _event;
+            wildRabbitEvent.KillTheRabbit(); // :(
+        }
+
+        public void KillFlower(int numberOfFlowerToBeKilled)
+        {
+            int counter = 0;
+            foreach (Tile tile in Grid)
+            {
+                if (tile.Flower is not null && tile.Flower.State != FlowerState.Dead)
+                {
+                    counter++;
+                    if (counter == numberOfFlowerToBeKilled)
+                    {
+                        tile.KillFlower();
+                    }
+                }
+            }
+        }
     }
 }

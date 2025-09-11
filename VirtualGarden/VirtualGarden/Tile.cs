@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 
 namespace VirtualGarden
 {
-    //This class represents one tile of the garden grid in which the user can plant a flower
+    /// <summary>
+    /// Represents one tile of the garden grid in which the user can plant a flower and take care of it.
+    /// </summary>
     public class Tile
     {
         //The number of the row this tile is in in the garden grid
@@ -54,7 +56,7 @@ namespace VirtualGarden
             Flower = null;
         }
 
-        public void WaterTile()
+        public void WaterFlower()
         {
             if (Flower is not null)
             {
@@ -155,11 +157,24 @@ namespace VirtualGarden
             Bugs = bugs;
         }
 
+        public void KillFlower()
+        {
+            if (Flower is null)
+            {
+                throw new FlowerNotPresentException($"Cannot kill flower on tile {PrintCoordinates()}. There is no flower on this tile.");
+            }
+            if (Flower.State == FlowerState.Dead)
+            {
+                throw new KillingAlreadyDeadFlowerException($"Cannot kill flower on tile {PrintCoordinates()}. This flower is already dead.");
+            }
+            Flower.State = FlowerState.Dead;
+        }
+
         private void KillFadedFlower()
         {
             if (Flower.BloomDays == Flower.FlowerType.BloomDays)
             {
-                Flower.State = FlowerState.Dead;
+                KillFlower();
             }
         }
 
@@ -167,7 +182,7 @@ namespace VirtualGarden
         {
             if (Flower.DaysSinceLastWatered > Flower.FlowerType.DaysBetweenWatering)
             {
-                Flower.State = FlowerState.Dead;
+                KillFlower();
             }
         }
 
@@ -175,7 +190,7 @@ namespace VirtualGarden
         {
             if (Bugs is not null && Bugs.DaysUntilFlowerDies == 0)
             {
-                Flower.State = FlowerState.Dead;
+                KillFlower();
                 Bugs = null;
             }
         }
