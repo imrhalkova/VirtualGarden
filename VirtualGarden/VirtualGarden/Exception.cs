@@ -66,18 +66,28 @@ namespace VirtualGarden
         internal InsufficientFundsException(string message) : base(message) { }
     }
 
-    public class KillingAlreadyDeadFlowerException : Exception
+    public class KillingAlreadyDeadFlowerException : GardenException
     {
         internal KillingAlreadyDeadFlowerException(string message) : base(message) { }
     }
 
-    public class KillingAlreadyDeadRabbitException : Exception
+    public class KillingAlreadyDeadRabbitException : GardenException
     {
         internal KillingAlreadyDeadRabbitException(string message) : base(message) { }
     }
 
-    public class WildRabbitEventNotActiveException : Exception
+    public class WildRabbitEventNotActiveException : GardenException
     {
         internal WildRabbitEventNotActiveException(string message) : base(message) { }
+    }
+
+    public class FileException : Exception
+    {
+        internal FileException(string message) : base(message) { }
+    }
+
+    public class UnableToLoadImageFromFileException : Exception
+    {
+        internal UnableToLoadImageFromFileException(string message) : base(message) { }
     }
 }

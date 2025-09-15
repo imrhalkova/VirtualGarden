@@ -375,7 +375,7 @@ namespace VirtualGarden
         public void PayToRepairTools()
         {
             int price = CountToolRepairPrice();
-            if (Player.Coins < price)
+            if (Player.Money < price)
             {
                 throw new InsufficientFundsException($"Cannot repair tools. The player does not have enought money.");
             }

@@ -31,7 +31,7 @@ namespace VirtualGardenTests
 
             garden.NewDay();
 
-            Assert.Equal(startingMoney + dailyIncome, garden.Player.Coins);
+            Assert.Equal(startingMoney + dailyIncome, garden.Player.Money);
         }
 
         [Fact]

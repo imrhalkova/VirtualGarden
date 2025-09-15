@@ -11,7 +11,7 @@ namespace VirtualGarden
         /// <summary>
         /// The number of coins the player currently has.
         /// </summary>
-        public int Coins { get; private set; } = 0;
+        public int Money { get; private set; } = 0;
 
         /// <summary>
         /// The number of coins the player automatically receives with each new day
@@ -22,30 +22,30 @@ namespace VirtualGarden
 
         public Player(int startingCoins, int newDayIncome)
         {
-            Coins = startingCoins;
+            Money = startingCoins;
             NewDayIncome = newDayIncome;
         }
         public Player() { }
 
         public void Update()
         {
-            Coins += NewDayIncome;
+            Money += NewDayIncome;
             playerStatistics.numberOfDay++;
         }
 
         public void AddMoney(int money)
         {
-            Coins += money;
+            Money += money;
         }
 
         public void SpendMoney(int money)
         {
-            Coins -= money;
+            Money -= money;
         }
 
         public class PlayerStatistics
         {
-            public int numberOfDay { get; set; } = 0;
+            public int numberOfDay { get; set; } = 1;
             public int FlowersWatered { get; set; } = 0;
             public PlayerStatistics() { }
         }

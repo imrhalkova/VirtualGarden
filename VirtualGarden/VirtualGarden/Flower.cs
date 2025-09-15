@@ -3,36 +3,60 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace VirtualGarden
 {
-    /*The abstract class from which all Flowers inherit.
-     The Flower classes consist of info that is same for all instances of said flower.*/
+    /// <summary>
+    /// The abstract class from which all Flowers inherit.
+    /// The Flower classes consist of information common for all instances of said flower.
+    /// </summary>
     public abstract class Flower
     {
-        //The name of this flower
+        /// <summary>
+        /// The name of this type of flower
+        /// </summary>
         public string Name { get; private set; }
 
-        //The amount of money needed to buy seeds of this flower
+        /// <summary>
+        /// The amount of money needed to buy seeds of this flower
+        /// </summary>
         public int SeedPrice { get; private set; }
 
-        //The number of days this flower can go without being watered.
+        /// <summary>
+        /// The number of days this flower can go without being watered.
+        /// </summary>
         public int DaysBetweenWatering { get; private set; }
 
-        /*The number of days this flower takes to get into blooming state when conditions for growth are met each day.
-         Including the day the flower was planted*/
+        /// <summary>
+        /// The number of days this flower takes to get into the blooming state when conditions for growth are met each day.
+        /// Including the day the flower was planted.
+        /// </summary>
         public int GrowthDays { get; private set; }
 
-        //The number of days this flower blooms and produces coins when conditions for blooming are met each day.
+        /// <summary>
+        /// The number of days this flower blooms and produces coins when conditions for blooming are met each day.
+        /// </summary>
         public int BloomDays { get; private set; }
 
-        //The number of coins this flower produces in one day while blooming.
+        /// <summary>
+        /// The number of coins this flower produces in one day while blooming.
+        /// </summary>
         public int DailyBloomIncome { get; private set; }
 
-        //A list of weights for each bug type signifying how likely is that bugtype to be in a bug infestation on this flower.
+        /// <summary>
+        /// A list of weights for each bug type signifying how likely is that bugtype to be in a bug infestation on this flower.
+        /// </summary>
         public abstract List<BugsWeight<Bugs>> BugWeights { get; }
 
-        //Maximum number of coins gained from the flower if it is not destroyed prematurely and the player collects coins from it every day.
+        /// <summary>
+        /// The filename of a file containing an image of this flower.
+        /// </summary>
+        public string ImageFilename { get; private set; }
+
+        /// <summary>
+        /// Maximum number of coins gained from the flower if it is not destroyed prematurely and the player collects coins from it every day.
+        /// </summary>
         public int MaximumIncome
         {
             get
@@ -41,7 +65,7 @@ namespace VirtualGarden
             }
         }
 
-        protected Flower(string name, int seedPrice, int daysBetweenWatering, int growthDays, int bloomDays, int dailyBloomIncome) 
+        protected Flower(string name, int seedPrice, int daysBetweenWatering, int growthDays, int bloomDays, int dailyBloomIncome, string imageFilename) 
         { 
             Name = name;
             SeedPrice = seedPrice;
@@ -49,6 +73,7 @@ namespace VirtualGarden
             GrowthDays = growthDays;
             BloomDays = bloomDays;
             DailyBloomIncome = dailyBloomIncome;
+            ImageFilename = imageFilename;
         }
     }
 
@@ -61,7 +86,7 @@ namespace VirtualGarden
             new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
             new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
         };
-        public Daisy() : base("Daisy", 5, 0, 5, 3, 5) { }
+        public Daisy() : base("Daisy", 5, 0, 5, 3, 5, "daisy.png") { }
     }
 
     public class Marigold : Flower
@@ -73,7 +98,7 @@ namespace VirtualGarden
             new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
             new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
         };
-        public Marigold() : base("Marigold", 20, 1, 6, 6, 5) { }
+        public Marigold() : base("Marigold", 20, 1, 6, 6, 5, "marigold.png") { }
     }
 
     public class Sunflower : Flower
@@ -85,7 +110,7 @@ namespace VirtualGarden
             new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
             new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
         };
-        public Sunflower() : base("Sunflower", 50, 2, 8, 10, 13) { }
+        public Sunflower() : base("Sunflower", 50, 2, 8, 10, 13, "sunflower.png") { }
     }
 
     public class Petunia : Flower
@@ -97,7 +122,7 @@ namespace VirtualGarden
             new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
             new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
         };
-        public Petunia() : base("Petunia", 80, 1, 9, 10, 20) { }
+        public Petunia() : base("Petunia", 80, 1, 9, 10, 20, "petunia.png") { }
     }
 
     public class Rose : Flower
@@ -109,7 +134,7 @@ namespace VirtualGarden
             new BugsWeight<Bugs>(BugTypes.ExoticBugs, 1),
             new BugsWeight<Bugs>(BugTypes.TropicalBugs, 1),
         };
-        public Rose() : base("Rose", 300, 0, 20, 5, 180) { }
+        public Rose() : base("Rose", 300, 0, 20, 5, 180, "rose.png") { }
     }
 
     public class Tulip : Flower
@@ -121,7 +146,7 @@ namespace VirtualGarden
             new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
             new BugsWeight<Bugs>(BugTypes.TropicalBugs, 2),
         };
-        public Tulip() : base("Tulip", 500, 1, 12, 8, 130) { }
+        public Tulip() : base("Tulip", 500, 1, 12, 8, 130, "tulip.png") { }
     }
 
     //The FlowerTypes class contains instances of all flowers that inherit from Flower
