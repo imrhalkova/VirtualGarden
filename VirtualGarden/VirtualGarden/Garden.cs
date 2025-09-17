@@ -93,6 +93,9 @@ namespace VirtualGarden
             }
         }
 
+        public int Rows { get { return this.Grid.GetLength(0); } }
+        public int Columns { get { return this.Grid.GetLength(1); } }
+
         public Garden(int rows, int columns, Player player) 
         {
             InitializeGrid(rows, columns);
@@ -133,7 +136,7 @@ namespace VirtualGarden
 
         public Tile GetTile(int i, int j)
         {
-            if (i < 0 || i >=  Grid.GetLength(0) || j < 0 || j >= Grid.GetLength(1))
+            if (i < 0 || i >=  Rows || j < 0 || j >= Columns)
             {
                 throw new TileIndexOutOfRangeException($"The tile indexes [{i}, {j}] are out of range.");
             }
@@ -267,10 +270,10 @@ namespace VirtualGarden
 
         public bool[,] GetCurrentPosOfWeed()
         {
-            bool[,] currentWeedPositions = new bool[Grid.GetLength(0), Grid.GetLength(1)];
-            for (int i = 0; i < Grid.GetLength(0); i++)
+            bool[,] currentWeedPositions = new bool[Rows, Columns];
+            for (int i = 0; i < Rows; i++)
             {
-                for (int j = 0; j < Grid.GetLength(1); j++)
+                for (int j = 0; j < Columns; j++)
                 {
                     currentWeedPositions[i, j] = GetTile(i, j).HasWeed;
                 }
@@ -301,7 +304,7 @@ namespace VirtualGarden
             (int, int)[] possibleAdjacentIndexes = new (int, int)[] { (row + 1, column), (row, column + 1), (row - 1, column), (row, column - 1) };
             foreach ((int, int) index in possibleAdjacentIndexes)
             {
-                if (( 0 <= index.Item1 && index.Item1 < Grid.GetLength(0)) &&  ( 0 <= index.Item2 && index.Item2 < Grid.GetLength(1))){
+                if (( 0 <= index.Item1 && index.Item1 < Rows) &&  ( 0 <= index.Item2 && index.Item2 < Columns)){
                     adjacentIndexes.Add(index);
                 }
             }

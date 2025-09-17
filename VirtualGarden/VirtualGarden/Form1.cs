@@ -8,11 +8,16 @@ namespace VirtualGarden
     {
         private Garden _garden;
         readonly string _picturesPath;
-        UIState _state = UIState.GARDEN;
+        UIState _state;
         private TableLayoutPanel _gardenPanel = new TableLayoutPanel();
+        private TableLayoutPanel _errorPanel = new TableLayoutPanel();
+        private TableLayoutPanel[,] _tilePanels;
         private Label _moneyLabel = new Label();
         private Label _dayLabel = new Label();
         private Button[,] _tileButtons;
+        private Label _errorMessage = new Label();
+        const string _noErrorText = "No errors";
+        private Button _clearErrorMessageButton = new Button();
         private (int, int)? _chosenTile;
 
         public Form1()
@@ -20,13 +25,19 @@ namespace VirtualGarden
             InitializeComponent();
             _garden = new Garden(4, 4, new Player(20, 20));
             _picturesPath = Path.Combine(Application.StartupPath, "pictures");
-            _tileButtons = new Button[_garden.Grid.GetLength(0), _garden.Grid.GetLength(1)];
-            GardenUIInitialization();
+            _tileButtons = new Button[_garden.Rows, _garden.Columns];
+            _tilePanels = new TableLayoutPanel[_garden.Rows, _garden.Columns];
+            GameUIInitialization();
+            //GardenUIInitialization();
+            //TilesInfoUIInitialization();
+            _state = UIState.MAINMENU;
             UpdateUI();
         }
 
         public enum UIState
         {
+            MAINMENU,
+            GAMEMENU,
             GARDEN,
             TILE_INFO
         }
@@ -35,21 +46,74 @@ namespace VirtualGarden
         {
             switch (_state)
             {
+                case UIState.MAINMENU:
+
+                    break;
                 case UIState.GARDEN:
+                    /*
                     _gardenPanel.Visible = true;
                     _moneyLabel.Text = $"Money: {_garden.Player.Money}";
                     _dayLabel.Text = $"Day: {_garden.Player.playerStatistics.numberOfDay}";
                     UpdateTilesUI();
+                    */
+                    break;
+                case UIState.TILE_INFO:
                     break;
             }
+        }
+
+        private void GameUIInitialization()
+        {
+            TableLayoutPanel gamePanel = new TableLayoutPanel();
+            gamePanel.RowCount = 2;
+            gamePanel.ColumnCount = 1;
+            gamePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 95));
+            gamePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 5));
+            gamePanel.BackColor = Color.YellowGreen;
+            gamePanel.Dock = DockStyle.Fill;
+            gamePanel.Visible = true;
+
+            //Add error panel
+            CreateErrorPanel();
+            gamePanel.Controls.Add(_errorPanel, 0, 1);
+            
+            this.Controls.Add(gamePanel);
+        }
+
+        /// <summary>
+        /// Creates a panel on the buttom of the screen for displaying error messages raised by the program.
+        /// The exceptions belong to the program's exception hierarchy.
+        /// </summary>
+        private void CreateErrorPanel()
+        {
+            _errorPanel.Dock = DockStyle.Fill;
+            _errorPanel.BackColor = Color.White;
+            _errorPanel.RowCount = 1;
+            _errorPanel.ColumnCount = 2;
+            _errorPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 90));
+            _errorPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
+            _errorPanel.Visible = false;
+
+            _errorMessage.Dock = DockStyle.Fill;
+            _errorMessage.Anchor = AnchorStyles.Left;
+            _errorMessage.Text = _noErrorText;
+            _errorPanel.Controls.Add(_errorMessage, 0, 0);
+
+            _clearErrorMessageButton.Dock = DockStyle.Fill;
+            _clearErrorMessageButton.Text = "Clear";
+            _clearErrorMessageButton.BackColor = Color.MistyRose;
+            _clearErrorMessageButton.FlatStyle = FlatStyle.Flat;
+            _clearErrorMessageButton.Click += ClearErrorMessageButton_Click;
+            _errorPanel.Controls.Add(_clearErrorMessageButton, 1, 0);
         }
 
         private void GardenUIInitialization()
         {
             _gardenPanel.Dock = DockStyle.Fill;
-            _gardenPanel.BackColor = Color.YellowGreen;
+            //_gardenPanel.BackColor = Color.YellowGreen;
             _gardenPanel.RowCount = 2;
             _gardenPanel.ColumnCount = 3;
+            _gardenPanel.Visible = false;
             
             _gardenPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 15));
             _gardenPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 80));
@@ -65,8 +129,7 @@ namespace VirtualGarden
             _gardenPanel.Controls.Add(CreatePlayerStatsPanel(), 2, 0);
 
             //Add the grid of tiles
-            _gardenPanel.Controls.Add(CreateTilesPanel(), 1, 1);
-
+            _gardenPanel.Controls.Add(CreateTilesGridPanel(), 1, 1);
 
             this.Controls.Add(_gardenPanel);
         }
@@ -115,12 +178,12 @@ namespace VirtualGarden
             return playerStatsPanel;
         }
 
-        private Panel CreateTilesPanel()
+        private Panel CreateTilesGridPanel()
         {
             TableLayoutPanel tilesPanel = new TableLayoutPanel();
             tilesPanel.Dock = DockStyle.Fill;
-            tilesPanel.RowCount = _garden.Grid.GetLength(0);
-            tilesPanel.ColumnCount = _garden.Grid.GetLength(1);
+            tilesPanel.RowCount = _garden.Rows;
+            tilesPanel.ColumnCount = _garden.Columns;
 
             for (int i = 0; i < tilesPanel.RowCount; i++)
             {
@@ -147,6 +210,45 @@ namespace VirtualGarden
             return tilesPanel;
         }
 
+        private void TilesInfoUIInitialization()
+        {
+            Button tileInfoBackButton = CreateTileInfoBackButton();
+            for (int i = 0; i < _garden.Rows; i++)
+            {
+                for (int j = 0; j < _garden.Columns; j++)
+                {
+                    _tilePanels[i, j] = new TableLayoutPanel();
+                    _tilePanels[i, j].RowCount = 3;
+                    _tilePanels[i, j].ColumnCount = 1;
+                    _tilePanels[i, j].RowStyles.Add(new RowStyle(SizeType.Percent, 15));
+                    _tilePanels[i, j].RowStyles.Add(new RowStyle(SizeType.Percent, 70));
+                    _tilePanels[i, j].RowStyles.Add(new RowStyle(SizeType.Percent, 15));
+                    _tilePanels[i, j].Dock = DockStyle.Fill;
+                    _tilePanels[i, j].Visible = false;
+
+                    TableLayoutPanel firstRow = new TableLayoutPanel();
+                    firstRow.RowCount = 1;
+                    firstRow.ColumnCount = 3;
+                    firstRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
+                    firstRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65));
+                    firstRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
+
+                    firstRow.Controls.Add(tileInfoBackButton, 0, 0);
+                    firstRow.Controls.Add(CreatePlayerStatsPanel(), 2, 0);
+                }
+            }
+        }
+
+        private Button CreateTileInfoBackButton()
+        {
+            Button tileInfoBackButton = new Button();
+            tileInfoBackButton.Text = "Back";
+            tileInfoBackButton.BackColor = Color.MistyRose;
+            tileInfoBackButton.Click += TileInfoBackButton_Click;
+            tileInfoBackButton.Dock = DockStyle.Fill;
+            return tileInfoBackButton;
+        }
+
         private void ResizeControl(Control control, Panel panel, double widthPercentage, double heightPercentage)
         {
             control.Size = new Size(
@@ -165,11 +267,23 @@ namespace VirtualGarden
             UpdateUI();
         }
 
+        private void TileInfoBackButton_Click(object? sender, EventArgs e)
+        {
+            _state = UIState.GARDEN;
+            UpdateUI();
+        }
+
         private void Tile_Click(int row, int column)
         {
             _state = UIState.TILE_INFO;
             _chosenTile = (row, column);
             UpdateUI();
+        }
+
+        private void ClearErrorMessageButton_Click(object? sender, EventArgs e)
+        {
+            _errorMessage.Text = _noErrorText;
+            _errorPanel.Visible = false;
         }
 
         private void PutImageOnTile(Image image, Button buttonTile)

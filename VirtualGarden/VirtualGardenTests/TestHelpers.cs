@@ -47,6 +47,6 @@ namespace VirtualGardenTests
             new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
             new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
         };
-        public TestFlower1() : base("Test Flower", 0, 0, 1, 1, 5) { }
+        public TestFlower1() : base("Test Flower", 0, 0, 1, 1, 5, "") { }
     }
 }

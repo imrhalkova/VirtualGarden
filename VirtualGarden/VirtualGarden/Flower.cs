@@ -157,7 +157,7 @@ namespace VirtualGarden
         public static Flower Sunflower = new Sunflower();
         public static Flower Petunia = new Petunia();
         public static Flower Rose = new Rose();
-        public static Flower Peonies = new Tulip();
+        public static Flower Tulip = new Tulip();
     }
 
     //The PlantedFlower class contains info specific to instances of a flower planted

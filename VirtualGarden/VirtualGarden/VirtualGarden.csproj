@@ -11,7 +11,10 @@
   <ItemGroup>
     <None Remove="pictures\daisy.png" />
     <None Remove="pictures\marigold.png" />
+    <None Remove="pictures\petunia.png" />
+    <None Remove="pictures\rose.png" />
     <None Remove="pictures\sunflower.png" />
+    <None Remove="pictures\tulip.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,7 +24,16 @@
     <Content Include="pictures\marigold.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="pictures\petunia.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="pictures\rose.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="pictures\sunflower.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="pictures\tulip.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
