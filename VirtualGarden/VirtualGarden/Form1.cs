@@ -6,30 +6,27 @@ namespace VirtualGarden
 {
     public partial class Form1 : Form
     {
-        private Garden _garden;
+        internal Garden? _garden;
         readonly string _picturesPath;
-        UIState _state;
+        private UIState _state;
+        TableLayoutPanel _gamePanel = new TableLayoutPanel();
+        TableLayoutPanel _mainMenuPanel = new TableLayoutPanel();
         private TableLayoutPanel _gardenPanel = new TableLayoutPanel();
         private TableLayoutPanel _errorPanel = new TableLayoutPanel();
-        private TableLayoutPanel[,] _tilePanels;
+        TableLayoutPanel _tileInfoPanel = new TableLayoutPanel();
         private Label _moneyLabel = new Label();
+        private Label _moneyLabel2 = new Label();
         private Label _dayLabel = new Label();
         private Button[,] _tileButtons;
         private Label _errorMessage = new Label();
-        const string _noErrorText = "No errors";
+        private const string _noErrorText = "No errors";
         private Button _clearErrorMessageButton = new Button();
-        private (int, int)? _chosenTile;
 
         public Form1()
         {
             InitializeComponent();
-            _garden = new Garden(4, 4, new Player(20, 20));
             _picturesPath = Path.Combine(Application.StartupPath, "pictures");
-            _tileButtons = new Button[_garden.Rows, _garden.Columns];
-            _tilePanels = new TableLayoutPanel[_garden.Rows, _garden.Columns];
             GameUIInitialization();
-            //GardenUIInitialization();
-            //TilesInfoUIInitialization();
             _state = UIState.MAINMENU;
             UpdateUI();
         }
@@ -42,42 +39,157 @@ namespace VirtualGarden
             TILE_INFO
         }
 
+        internal static class TileControls
+        {
+            internal static (int, int) _chosenTile {  get; set; }
+
+            internal static Label RowLabel {  get; } = new Label();
+            internal static Label ColumnLabel { get; } = new Label();
+            internal static Label FlowerLabel { get; } = new Label();
+            internal static Label WeedLabel { get; } = new Label();
+            internal static Label BugsLabel { get; } = new Label();
+            internal static Label CoinsLabel { get; } = new Label();
+            
+            internal static void Inicialize()
+            {
+                RowLabel.TextAlign = ContentAlignment.MiddleCenter;
+                ColumnLabel.TextAlign = ContentAlignment.MiddleCenter;
+                FlowerLabel.TextAlign = ContentAlignment.MiddleCenter;
+                WeedLabel.TextAlign = ContentAlignment.MiddleCenter;
+                BugsLabel.TextAlign = ContentAlignment.MiddleCenter;
+                CoinsLabel.TextAlign = ContentAlignment.MiddleCenter;
+            }
+            
+        }
+
+        private void UpdateTileControls()
+        {
+            int row = TileControls._chosenTile.Item1;
+            int column = TileControls._chosenTile.Item2;
+            TileControls.RowLabel.Text = $"Row: {row}";
+            TileControls.ColumnLabel.Text = $"Column: {column}";
+
+            Tile tile = _garden.GetTile(row, column);
+            if (tile.Flower is null)
+            {
+                TileControls.FlowerLabel.Text = $"No flower";
+            }
+            else
+            {
+                TileControls.FlowerLabel.Text = $"Flower: {tile.Flower.FlowerType.Name}";
+            }
+
+            if (tile.HasWeed)
+            {
+                TileControls.WeedLabel.Text = "Has weed";
+            }
+            else
+            {
+                TileControls.WeedLabel.Text = "No weed";
+            }
+
+            if (tile.Bugs is null)
+            {
+                TileControls.BugsLabel.Text = "No bugs";
+            }
+            else
+            {
+                TileControls.BugsLabel.Text = $"Has bugs (spray price: {tile.Bugs.Bugs.SprayPrice})";
+            }
+
+            TileControls.CoinsLabel.Text = $"Coins: {tile.Coins}";
+        }
+
         private void UpdateUI()
         {
             switch (_state)
             {
                 case UIState.MAINMENU:
-
+                    _mainMenuPanel.Visible = true;
+                    _gardenPanel.Visible = false;
+                    _tileInfoPanel.Visible = false;
                     break;
                 case UIState.GARDEN:
-                    /*
+                    _mainMenuPanel.Visible= false;
                     _gardenPanel.Visible = true;
+                    _tileInfoPanel.Visible = false;
                     _moneyLabel.Text = $"Money: {_garden.Player.Money}";
                     _dayLabel.Text = $"Day: {_garden.Player.playerStatistics.numberOfDay}";
                     UpdateTilesUI();
-                    */
                     break;
                 case UIState.TILE_INFO:
+                    _mainMenuPanel.Visible = false;
+                    _gardenPanel.Visible = false;
+                    _tileInfoPanel.Visible = true;
+                    _moneyLabel2.Text = $"Money: {_garden.Player.Money}";
+                    UpdateTileControls();
                     break;
             }
         }
 
         private void GameUIInitialization()
         {
-            TableLayoutPanel gamePanel = new TableLayoutPanel();
-            gamePanel.RowCount = 2;
-            gamePanel.ColumnCount = 1;
-            gamePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 95));
-            gamePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 5));
-            gamePanel.BackColor = Color.YellowGreen;
-            gamePanel.Dock = DockStyle.Fill;
-            gamePanel.Visible = true;
+            _gamePanel.RowCount = 2;
+            _gamePanel.ColumnCount = 1;
+            _gamePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 95));
+            _gamePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 5));
+            _gamePanel.BackColor = Color.YellowGreen;
+            _gamePanel.Dock = DockStyle.Fill;
+            _gamePanel.Visible = true;
+
+            //Add main menu
+            _gamePanel.Controls.Add(CreateMainMenu(), 0, 0);
 
             //Add error panel
             CreateErrorPanel();
-            gamePanel.Controls.Add(_errorPanel, 0, 1);
+            _gamePanel.Controls.Add(_errorPanel, 0, 1);
             
-            this.Controls.Add(gamePanel);
+            this.Controls.Add(_gamePanel);
+        }
+
+        private Panel CreateMainMenu()
+        {
+            _mainMenuPanel.Dock = DockStyle.Fill;
+            _mainMenuPanel.RowCount = 3;
+            _mainMenuPanel.ColumnCount = 3;
+
+            _mainMenuPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 30));
+            _mainMenuPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 40));
+            _mainMenuPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 30));
+            _mainMenuPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
+            _mainMenuPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+            _mainMenuPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
+
+            TableLayoutPanel buttonPanel = new TableLayoutPanel();
+            buttonPanel.RowCount = 3;
+            buttonPanel.ColumnCount = 1;
+            buttonPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 34));
+            buttonPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 33));
+            buttonPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 33));
+
+            Button newGameButton = new Button();
+            newGameButton.Dock = DockStyle.Fill;
+            newGameButton.Click += NewGameButton_Click;
+            newGameButton.Text = "New Game";
+            newGameButton.BackColor = Color.MistyRose;
+            buttonPanel.Controls.Add(newGameButton, 1, 0);
+
+            Button loadGameButton = new Button();
+            loadGameButton.Dock = DockStyle.Fill;
+            loadGameButton.Click += LoadGameButton_Click;
+            loadGameButton.Text = "Load Game";
+            loadGameButton.BackColor = Color.MistyRose;
+            buttonPanel.Controls.Add(loadGameButton, 1, 1);
+
+            Button exitGameButton = new Button();
+            exitGameButton.Dock = DockStyle.Fill;
+            exitGameButton.Click += ExitGameButton_Click;
+            exitGameButton.Text = "Exit";
+            exitGameButton.BackColor = Color.MistyRose;
+            buttonPanel.Controls.Add(exitGameButton, 1, 2);
+
+            _mainMenuPanel.Controls.Add(buttonPanel, 1, 1);
+            return _mainMenuPanel;
         }
 
         /// <summary>
@@ -109,6 +221,8 @@ namespace VirtualGarden
 
         private void GardenUIInitialization()
         {
+            _tileButtons = new Button[_garden.Rows, _garden.Columns];
+
             _gardenPanel.Dock = DockStyle.Fill;
             //_gardenPanel.BackColor = Color.YellowGreen;
             _gardenPanel.RowCount = 2;
@@ -131,7 +245,10 @@ namespace VirtualGarden
             //Add the grid of tiles
             _gardenPanel.Controls.Add(CreateTilesGridPanel(), 1, 1);
 
-            this.Controls.Add(_gardenPanel);
+            _gamePanel.Controls.Add(_gardenPanel, 0, 0);
+
+            
+            TilesInfoUIInitialization();
         }
 
         private Panel CreatePanelWithNewDayButton()
@@ -202,7 +319,10 @@ namespace VirtualGarden
                     _tileButtons[i, j] = new Button();
                     _tileButtons[i, j].Dock = DockStyle.Fill;
                     _tileButtons[i, j].BackColor = Color.SaddleBrown;
-                    _tileButtons[i, j].Click += (s, e) => Tile_Click(i, j);
+
+                    int row = i;
+                    int column = j;
+                    _tileButtons[row, column].Click += (s, e) => Tile_Click(row, column);
                     tilesPanel.Controls.Add(_tileButtons[i, j], j, i);
                 }
             }
@@ -212,41 +332,74 @@ namespace VirtualGarden
 
         private void TilesInfoUIInitialization()
         {
-            Button tileInfoBackButton = CreateTileInfoBackButton();
-            for (int i = 0; i < _garden.Rows; i++)
-            {
-                for (int j = 0; j < _garden.Columns; j++)
-                {
-                    _tilePanels[i, j] = new TableLayoutPanel();
-                    _tilePanels[i, j].RowCount = 3;
-                    _tilePanels[i, j].ColumnCount = 1;
-                    _tilePanels[i, j].RowStyles.Add(new RowStyle(SizeType.Percent, 15));
-                    _tilePanels[i, j].RowStyles.Add(new RowStyle(SizeType.Percent, 70));
-                    _tilePanels[i, j].RowStyles.Add(new RowStyle(SizeType.Percent, 15));
-                    _tilePanels[i, j].Dock = DockStyle.Fill;
-                    _tilePanels[i, j].Visible = false;
+            _tileInfoPanel.Dock = DockStyle.Fill;
+            _tileInfoPanel.RowCount = 3;
+            _tileInfoPanel.ColumnCount = 1;
+            _tileInfoPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 5));
+            _tileInfoPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 80));
+            _tileInfoPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 15));
+            _tileInfoPanel.BackColor = Color.Beige;
 
-                    TableLayoutPanel firstRow = new TableLayoutPanel();
-                    firstRow.RowCount = 1;
-                    firstRow.ColumnCount = 3;
-                    firstRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
-                    firstRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65));
-                    firstRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
-
-                    firstRow.Controls.Add(tileInfoBackButton, 0, 0);
-                    firstRow.Controls.Add(CreatePlayerStatsPanel(), 2, 0);
-                }
-            }
+            _tileInfoPanel.Controls.Add(CreateTileInfoBackButton(), 0, 0);
+            _tileInfoPanel.Controls.Add(CreateTileInfoPanel(), 0, 1);
+            _gamePanel.Controls.Add(_tileInfoPanel, 0, 0);
         }
 
-        private Button CreateTileInfoBackButton()
+        private Panel CreateTileInfoBackButton()
         {
             Button tileInfoBackButton = new Button();
             tileInfoBackButton.Text = "Back";
             tileInfoBackButton.BackColor = Color.MistyRose;
             tileInfoBackButton.Click += TileInfoBackButton_Click;
             tileInfoBackButton.Dock = DockStyle.Fill;
-            return tileInfoBackButton;
+            tileInfoBackButton.FlatStyle = FlatStyle.Flat;
+
+            TableLayoutPanel backButtonTable = new TableLayoutPanel();
+            backButtonTable.Dock = DockStyle.Fill;
+            backButtonTable.RowCount = 1;
+            backButtonTable.ColumnCount = 3;
+            backButtonTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
+            backButtonTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
+            backButtonTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
+            backButtonTable.Controls.Add(tileInfoBackButton, 0, 0);
+
+            backButtonTable.Controls.Add(_moneyLabel2, 2, 0);
+            return backButtonTable;
+        }
+
+        private Panel CreateTileInfoPanel()
+        {
+            TableLayoutPanel tileInfo = new TableLayoutPanel();
+            tileInfo.Dock = DockStyle.Fill;
+            tileInfo.RowCount = 1;
+            tileInfo.ColumnCount = 2;
+            tileInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            tileInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+
+            tileInfo.Controls.Add(CreateTileInfoWithoutFlowerPanel(), 0, 0);
+
+            return tileInfo;
+        }
+
+        private Panel CreateTileInfoWithoutFlowerPanel()
+        {
+            TableLayoutPanel tileInfo = new TableLayoutPanel();
+            tileInfo.Dock = DockStyle.Fill;
+            tileInfo.ColumnCount = 1;
+            tileInfo.RowCount = 6;
+            for (int i = 0; i < tileInfo.RowCount; i++)
+            {
+                tileInfo.RowStyles.Add(new RowStyle(SizeType.Percent, 100 / tileInfo.RowCount));
+            }
+
+            TileControls.Inicialize();
+            tileInfo.Controls.Add(TileControls.RowLabel, 0, 0);
+            tileInfo.Controls.Add(TileControls.ColumnLabel, 0, 1);
+            tileInfo.Controls.Add(TileControls.FlowerLabel, 0, 2);
+            tileInfo.Controls.Add(TileControls.WeedLabel, 0, 3);
+            tileInfo.Controls.Add(TileControls.BugsLabel, 0, 4);
+            tileInfo.Controls.Add(TileControls.CoinsLabel, 0, 5);
+            return tileInfo;
         }
 
         private void ResizeControl(Control control, Panel panel, double widthPercentage, double heightPercentage)
@@ -276,7 +429,7 @@ namespace VirtualGarden
         private void Tile_Click(int row, int column)
         {
             _state = UIState.TILE_INFO;
-            _chosenTile = (row, column);
+            TileControls._chosenTile = (row, column);
             UpdateUI();
         }
 
@@ -330,6 +483,24 @@ namespace VirtualGarden
                     }
                 }
             }
+        }
+
+        private void NewGameButton_Click(object? sender, EventArgs e)
+        {
+            _garden = new Garden(4, 4, new Player(20, 20));
+            _state = UIState.GARDEN;
+            GardenUIInitialization();
+            UpdateUI();
+        }
+
+        private void LoadGameButton_Click(object? sender, EventArgs e)
+        {
+
+        }
+
+        private void ExitGameButton_Click(object? sender, EventArgs e)
+        {
+            Application.Exit();
         }
     }
 }
