@@ -19,7 +19,7 @@ namespace VirtualGarden
         public Player Player {  get; private set; }
 
         //The probability that weeds will be spawned on one empty tile the next day with no active event affecting weed spawning.
-        private double _normalWeedChance = 0.3;
+        private double _normalWeedChance = 0.15;
 
         /// <summary>
         /// The probability that weeds will be spawned on one empty tile the next day.
@@ -59,8 +59,10 @@ namespace VirtualGarden
         /// </summary>
         public double WeedSpreadChance { get; private set; } = 0.5;
 
-        /*A random number generator used for making decisions in the garden that have certain probabilities - spawning and spreading
-        of weed, spawning and picking insects, events generating.*/
+        /// <summary>
+        /// A random number generator used for making decisions in the garden that have certain probabilities - spawning and spreading
+        /// of weed, spawning and picking insects, events generating.
+        /// </summary>
         public IRandomNumberGenerator Rand { get; } = new DefaultRandomGenerator();
 
         //Enables/Disables events in the game.
@@ -148,7 +150,9 @@ namespace VirtualGarden
             return GetTile(index.Item1, index.Item2);
         }
 
-        //Updates the whole garden for a new day
+        /// <summary>
+        /// Updates the whole garden for a new day.
+        /// </summary>
         public void NewDay()
         {
             UpdateExistingBugInfestations();
@@ -373,6 +377,34 @@ namespace VirtualGarden
                 throw new BrokenToolsException($"Cannot remove weed from tile {tile.PrintCoordinates()}. The tools are broken.");
             }
             tile.RemoveWeed();
+        }
+
+        public void RemoveBugs(int row, int column)
+        {
+            RemoveBugs(GetTile(row, column));
+        }
+
+        public void RemoveBugs(Tile tile)
+        {
+            if (tile.Bugs is null)
+            {
+                throw new BugsNotPresentException($"Cannot remove bugs from tile {tile.PrintCoordinates()}. There are no bugs on this tile.");
+            }
+            if (tile.Bugs.Bugs.SprayPrice > Player.Money)
+            {
+                throw new InsufficientFundsException($"Cannot remove bugs from tile {tile.PrintCoordinates()}. Not enought money.");
+            }
+            tile.RemoveBugs();
+        }
+
+        public void RemoveFlower(int row, int column)
+        {
+            RemoveFlower(GetTile(row, column));
+        }
+
+        public void RemoveFlower(Tile tile)
+        {
+            tile.RemoveFlower();
         }
 
         public void PayToRepairTools()

@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Diagnostics.Tracing;
+using static VirtualGarden.Form1;
 
 namespace VirtualGarden
 {
@@ -21,6 +22,11 @@ namespace VirtualGarden
         private Label _errorMessage = new Label();
         private const string _noErrorText = "No errors";
         private Button _clearErrorMessageButton = new Button();
+        private PlantedFlowerControls _plantedFlowerControls = PlantedFlowerControls.CreatePlantedFlowerControls();
+        private TileUserButtons _tileUserButtons = TileUserButtons.CreateTileUserButtons();
+        private (int, int) _chosenTile { get; set; }
+
+        private readonly Color _defaultTileColor = Color.SaddleBrown;
 
         public Form1()
         {
@@ -36,21 +42,73 @@ namespace VirtualGarden
             MAINMENU,
             GAMEMENU,
             GARDEN,
-            TILE_INFO
+            TILE_INFO,
+            FLOWER_CATALOGUE
         }
 
-        internal static class TileControls
+        private void UpdateUI()
         {
-            internal static (int, int) _chosenTile {  get; set; }
+            switch (_state)
+            {
+                case UIState.MAINMENU:
+                    _mainMenuPanel.Visible = true;
+                    _gardenPanel.Visible = false;
+                    _tileInfoPanel.Visible = false;
+                    break;
+                case UIState.GARDEN:
+                    _mainMenuPanel.Visible= false;
+                    _gardenPanel.Visible = true;
+                    _tileInfoPanel.Visible = false;
+                    _moneyLabel.Text = $"Money: {_garden.Player.Money}";
+                    _dayLabel.Text = $"Day: {_garden.Player.playerStatistics.numberOfDay}";
+                    UpdateTilesUI();
+                    break;
+                case UIState.TILE_INFO:
+                    _mainMenuPanel.Visible = false;
+                    _gardenPanel.Visible = false;
+                    _tileInfoPanel.Visible = true;
+                    _moneyLabel2.Text = $"Money: {_garden.Player.Money}";
+                    UpdateTileControls(_garden.GetTile(_chosenTile));
+                    UpdatePlantedFlowerControls(_garden.GetTile(_chosenTile));
+                    break;
+                case UIState.FLOWER_CATALOGUE:
+                    _mainMenuPanel.Visible = false;
+                    _gardenPanel.Visible = false;
+                    _tileInfoPanel.Visible = false;
+                    break;
+            }
+        }
 
-            internal static Label RowLabel {  get; } = new Label();
+        private void GameUIInitialization()
+        {
+            _gamePanel.RowCount = 2;
+            _gamePanel.ColumnCount = 1;
+            _gamePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 95));
+            _gamePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 5));
+            _gamePanel.BackColor = Color.YellowGreen;
+            _gamePanel.Dock = DockStyle.Fill;
+            _gamePanel.Visible = true;
+
+            //Add main menu
+            _gamePanel.Controls.Add(CreateMainMenu(), 0, 0);
+
+            //Add error panel
+            CreateErrorPanel();
+            _gamePanel.Controls.Add(_errorPanel, 0, 1);
+            
+            this.Controls.Add(_gamePanel);
+        }
+
+        private static class TileControls
+        {
+            internal static Label RowLabel { get; } = new Label();
             internal static Label ColumnLabel { get; } = new Label();
             internal static Label FlowerLabel { get; } = new Label();
             internal static Label WeedLabel { get; } = new Label();
             internal static Label BugsLabel { get; } = new Label();
             internal static Label CoinsLabel { get; } = new Label();
-            
-            internal static void Inicialize()
+
+            internal static void Initialize()
             {
                 RowLabel.TextAlign = ContentAlignment.MiddleCenter;
                 ColumnLabel.TextAlign = ContentAlignment.MiddleCenter;
@@ -59,17 +117,16 @@ namespace VirtualGarden
                 BugsLabel.TextAlign = ContentAlignment.MiddleCenter;
                 CoinsLabel.TextAlign = ContentAlignment.MiddleCenter;
             }
-            
+
         }
 
-        private void UpdateTileControls()
+        private void UpdateTileControls(Tile tile)
         {
-            int row = TileControls._chosenTile.Item1;
-            int column = TileControls._chosenTile.Item2;
+            int row = tile.Row;
+            int column = tile.Column;
             TileControls.RowLabel.Text = $"Row: {row}";
             TileControls.ColumnLabel.Text = $"Column: {column}";
 
-            Tile tile = _garden.GetTile(row, column);
             if (tile.Flower is null)
             {
                 TileControls.FlowerLabel.Text = $"No flower";
@@ -100,51 +157,81 @@ namespace VirtualGarden
             TileControls.CoinsLabel.Text = $"Coins: {tile.Coins}";
         }
 
-        private void UpdateUI()
+        internal class PlantedFlowerControls
         {
-            switch (_state)
+            internal Label GrowthDaysLabel { get; } = new Label();
+            internal Label BloomDaysLabel { get; } = new Label();
+            internal Label DaysSinceLastWateredLabel { get; } = new Label();
+            internal Label StateLabel { get; } = new Label();
+            private PlantedFlowerControls()
             {
-                case UIState.MAINMENU:
-                    _mainMenuPanel.Visible = true;
-                    _gardenPanel.Visible = false;
-                    _tileInfoPanel.Visible = false;
-                    break;
-                case UIState.GARDEN:
-                    _mainMenuPanel.Visible= false;
-                    _gardenPanel.Visible = true;
-                    _tileInfoPanel.Visible = false;
-                    _moneyLabel.Text = $"Money: {_garden.Player.Money}";
-                    _dayLabel.Text = $"Day: {_garden.Player.playerStatistics.numberOfDay}";
-                    UpdateTilesUI();
-                    break;
-                case UIState.TILE_INFO:
-                    _mainMenuPanel.Visible = false;
-                    _gardenPanel.Visible = false;
-                    _tileInfoPanel.Visible = true;
-                    _moneyLabel2.Text = $"Money: {_garden.Player.Money}";
-                    UpdateTileControls();
-                    break;
+                GrowthDaysLabel.TextAlign = ContentAlignment.MiddleCenter;
+                BloomDaysLabel.TextAlign = ContentAlignment.MiddleCenter;
+                DaysSinceLastWateredLabel.TextAlign = ContentAlignment.MiddleCenter;
+                StateLabel.TextAlign = ContentAlignment.MiddleCenter;
+            }
+            internal static PlantedFlowerControls CreatePlantedFlowerControls()
+            {
+                return new PlantedFlowerControls();
             }
         }
 
-        private void GameUIInitialization()
+        private void UpdatePlantedFlowerControls(Tile tile)
         {
-            _gamePanel.RowCount = 2;
-            _gamePanel.ColumnCount = 1;
-            _gamePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 95));
-            _gamePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 5));
-            _gamePanel.BackColor = Color.YellowGreen;
-            _gamePanel.Dock = DockStyle.Fill;
-            _gamePanel.Visible = true;
+            if (tile.Flower is not null)
+            {
+                _plantedFlowerControls.GrowthDaysLabel.Text = $"Days grown: {tile.Flower.GrowthDays}";
+                _plantedFlowerControls.BloomDaysLabel.Text = $"Days bloomed: {tile.Flower.BloomDays}";
+                _plantedFlowerControls.DaysSinceLastWateredLabel.Text = $"Days since last watered: {tile.Flower.DaysSinceLastWatered}";
+                _plantedFlowerControls.StateLabel.Text = $"State: {tile.Flower.State}";
+            }
+        }
 
-            //Add main menu
-            _gamePanel.Controls.Add(CreateMainMenu(), 0, 0);
+        internal class TileUserButtons
+        {
+            internal Button WaterFlowerButton { get; set; }
+            internal Button RemoveWeedButton { get; set; }
+            internal Button RemoveBugsButton { get; set; }
+            internal Button CollectCoinsButton { get; set; }
+            internal Button RemoveFlowerButton { get; set; }
+            private TileUserButtons()
+            {
+                WaterFlowerButton = CreateButton("Water");
+                RemoveWeedButton = CreateButton("Remove weed");
+                RemoveBugsButton = CreateButton("Remove bugs");
+                CollectCoinsButton = CreateButton("Collect coins");
+                RemoveFlowerButton = CreateButton("Remove flower");
+            }
+            internal static TileUserButtons CreateTileUserButtons()
+            {
+                return new TileUserButtons();
+            }
+        }
 
-            //Add error panel
-            CreateErrorPanel();
-            _gamePanel.Controls.Add(_errorPanel, 0, 1);
-            
-            this.Controls.Add(_gamePanel);
+        internal class FlowerTypeControls
+        {
+            internal Label NameLabel { get; } = new Label();
+            internal Label GrowthDaysLabel { get; } = new Label();
+            internal Label BloomDaysLabel { get; } = new Label();
+            internal Label DaysBetweenWateringLabel { get; } = new Label();
+            internal Label DailyBloomIncomeLabel { get; } = new Label();
+            internal Label MaximumIncomeLabel { get; } = new Label();
+            internal Label SeedPriceLabel { get; } = new Label();
+            private FlowerTypeControls()
+            {
+                NameLabel.TextAlign = ContentAlignment.MiddleLeft;
+                GrowthDaysLabel.TextAlign = ContentAlignment.MiddleLeft;
+                BloomDaysLabel.TextAlign = ContentAlignment.MiddleLeft;
+                DaysBetweenWateringLabel.TextAlign = ContentAlignment.MiddleLeft;
+                DailyBloomIncomeLabel.TextAlign = ContentAlignment.MiddleLeft;
+                MaximumIncomeLabel.TextAlign = ContentAlignment.MiddleLeft;
+                SeedPriceLabel.TextAlign = ContentAlignment.MiddleLeft;
+            }
+
+            internal static FlowerTypeControls CreateFlowerTypeControls()
+            {
+                return new FlowerTypeControls();
+            }
         }
 
         private Panel CreateMainMenu()
@@ -206,10 +293,12 @@ namespace VirtualGarden
             _errorPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
             _errorPanel.Visible = false;
 
-            _errorMessage.Dock = DockStyle.Fill;
-            _errorMessage.Anchor = AnchorStyles.Left;
+            _errorMessage.TextAlign = ContentAlignment.MiddleLeft;
             _errorMessage.Text = _noErrorText;
             _errorPanel.Controls.Add(_errorMessage, 0, 0);
+            _errorMessage.Dock = DockStyle.Fill;
+            _errorMessage.AutoSize = false;
+            _errorMessage.AutoEllipsis = false;
 
             _clearErrorMessageButton.Dock = DockStyle.Fill;
             _clearErrorMessageButton.Text = "Clear";
@@ -318,7 +407,7 @@ namespace VirtualGarden
                 {
                     _tileButtons[i, j] = new Button();
                     _tileButtons[i, j].Dock = DockStyle.Fill;
-                    _tileButtons[i, j].BackColor = Color.SaddleBrown;
+                    _tileButtons[i, j].BackColor = _defaultTileColor;
 
                     int row = i;
                     int column = j;
@@ -335,24 +424,21 @@ namespace VirtualGarden
             _tileInfoPanel.Dock = DockStyle.Fill;
             _tileInfoPanel.RowCount = 3;
             _tileInfoPanel.ColumnCount = 1;
-            _tileInfoPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 5));
+            _tileInfoPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 10));
             _tileInfoPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 80));
-            _tileInfoPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 15));
+            _tileInfoPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 10));
             _tileInfoPanel.BackColor = Color.Beige;
 
             _tileInfoPanel.Controls.Add(CreateTileInfoBackButton(), 0, 0);
             _tileInfoPanel.Controls.Add(CreateTileInfoPanel(), 0, 1);
+            _tileInfoPanel.Controls.Add(CreateTileUserButtonsPanel(), 0, 2);
             _gamePanel.Controls.Add(_tileInfoPanel, 0, 0);
         }
 
         private Panel CreateTileInfoBackButton()
         {
-            Button tileInfoBackButton = new Button();
-            tileInfoBackButton.Text = "Back";
-            tileInfoBackButton.BackColor = Color.MistyRose;
+            Button tileInfoBackButton = CreateButton("Back");
             tileInfoBackButton.Click += TileInfoBackButton_Click;
-            tileInfoBackButton.Dock = DockStyle.Fill;
-            tileInfoBackButton.FlatStyle = FlatStyle.Flat;
 
             TableLayoutPanel backButtonTable = new TableLayoutPanel();
             backButtonTable.Dock = DockStyle.Fill;
@@ -377,6 +463,7 @@ namespace VirtualGarden
             tileInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
             tileInfo.Controls.Add(CreateTileInfoWithoutFlowerPanel(), 0, 0);
+            tileInfo.Controls.Add(CreateTileFlowerInfoPanel(), 1, 0);
 
             return tileInfo;
         }
@@ -392,7 +479,7 @@ namespace VirtualGarden
                 tileInfo.RowStyles.Add(new RowStyle(SizeType.Percent, 100 / tileInfo.RowCount));
             }
 
-            TileControls.Inicialize();
+            TileControls.Initialize();
             tileInfo.Controls.Add(TileControls.RowLabel, 0, 0);
             tileInfo.Controls.Add(TileControls.ColumnLabel, 0, 1);
             tileInfo.Controls.Add(TileControls.FlowerLabel, 0, 2);
@@ -400,6 +487,53 @@ namespace VirtualGarden
             tileInfo.Controls.Add(TileControls.BugsLabel, 0, 4);
             tileInfo.Controls.Add(TileControls.CoinsLabel, 0, 5);
             return tileInfo;
+        }
+
+        private Panel CreateTileFlowerInfoPanel()
+        {
+            TableLayoutPanel tileFlowerInfo = new TableLayoutPanel();
+            tileFlowerInfo.Dock = DockStyle.Fill;
+            tileFlowerInfo.RowCount = 4;
+            tileFlowerInfo.ColumnCount = 1;
+            for (int i = 0; i < tileFlowerInfo.RowCount; i++)
+            {
+                tileFlowerInfo.RowStyles.Add(new RowStyle(SizeType.Percent, 100 / tileFlowerInfo.RowCount));
+            }
+            tileFlowerInfo.Controls.Add(_plantedFlowerControls.GrowthDaysLabel, 0, 0);
+            tileFlowerInfo.Controls.Add(_plantedFlowerControls.BloomDaysLabel, 0, 1);
+            tileFlowerInfo.Controls.Add(_plantedFlowerControls.DaysSinceLastWateredLabel, 0, 2);
+            tileFlowerInfo.Controls.Add(_plantedFlowerControls.StateLabel, 0, 3);
+            return tileFlowerInfo;
+        }
+
+        private Panel CreateTileUserButtonsPanel()
+        {
+            TableLayoutPanel tileUserButtonsPanel = new TableLayoutPanel();
+            tileUserButtonsPanel.RowCount = 1;
+            tileUserButtonsPanel.ColumnCount = 5;
+            tileUserButtonsPanel.Dock = DockStyle.Fill;
+            AddSameSizeColumnStyle(tileUserButtonsPanel);
+
+            _tileUserButtons.WaterFlowerButton.Click += WaterFlowerButton_Click;
+            _tileUserButtons.RemoveWeedButton.Click += RemoveWeedButton_Click;
+            _tileUserButtons.RemoveBugsButton.Click += RemoveBugsButton_Click;
+            _tileUserButtons.CollectCoinsButton.Click += CollectCoinsButton_Click;
+            _tileUserButtons.RemoveFlowerButton.Click += RemoveFlowerButton_Click;
+
+            tileUserButtonsPanel.Controls.Add(_tileUserButtons.WaterFlowerButton, 0, 0);
+            tileUserButtonsPanel.Controls.Add(_tileUserButtons.RemoveWeedButton, 1, 0);
+            tileUserButtonsPanel.Controls.Add(_tileUserButtons.RemoveBugsButton, 2, 0);
+            tileUserButtonsPanel.Controls.Add(_tileUserButtons.CollectCoinsButton, 3, 0);
+            tileUserButtonsPanel.Controls.Add(_tileUserButtons.RemoveFlowerButton, 4, 0);
+
+            return tileUserButtonsPanel;
+        }
+
+        private Panel CreateFlowerTypePanel()
+        {
+            TableLayoutPanel flowerTypePanel = new TableLayoutPanel();
+
+            return flowerTypePanel;
         }
 
         private void ResizeControl(Control control, Panel panel, double widthPercentage, double heightPercentage)
@@ -416,7 +550,14 @@ namespace VirtualGarden
 
         private void NewDayButton_Click(object? sender, EventArgs e)
         {
-            _garden.NewDay();
+            try
+            {
+                _garden.NewDay();
+            }
+            catch(GardenException ex)
+            {
+                WriteErrorMessage(ex.Message);
+            }
             UpdateUI();
         }
 
@@ -429,7 +570,7 @@ namespace VirtualGarden
         private void Tile_Click(int row, int column)
         {
             _state = UIState.TILE_INFO;
-            TileControls._chosenTile = (row, column);
+            _chosenTile = (row, column);
             UpdateUI();
         }
 
@@ -437,6 +578,7 @@ namespace VirtualGarden
         {
             _errorMessage.Text = _noErrorText;
             _errorPanel.Visible = false;
+            UpdateUI();
         }
 
         private void PutImageOnTile(Image image, Button buttonTile)
@@ -454,7 +596,18 @@ namespace VirtualGarden
                 {
                     _tileButtons[i, j].Text = "";
                     Tile tile = _garden.GetTile(i, j);
-                    if (tile.Flower is not null){
+
+                    if (tile.HasWeed)
+                    {
+                        _tileButtons[i, j].BackColor = Color.Olive;
+                    }
+                    else
+                    {
+                        _tileButtons[i, j].BackColor = _defaultTileColor;
+                    }
+
+                    if (tile.Flower is not null)
+                    {
                         FlowerState flowerState = tile.Flower.State;
                         switch (flowerState)
                         {
@@ -474,7 +627,7 @@ namespace VirtualGarden
                                     //write e.message into error output
                                     _tileButtons[i, j].Text = "Image not loaded.";
                                 }
-                                
+
                                 break;
                             case FlowerState.Dead:
                                 //show dead image on tile
@@ -501,6 +654,104 @@ namespace VirtualGarden
         private void ExitGameButton_Click(object? sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        internal static Button CreateButton(string text)
+        {
+            Button button = new Button();
+            button.Text = text;
+            button.Dock = DockStyle.Fill;
+            button.BackColor = Color.MistyRose;
+            button.FlatStyle = FlatStyle.Flat;
+            return button;
+        }
+
+        private void WaterFlowerButton_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                _garden.WaterTile(_chosenTile.Item1, _chosenTile.Item2);
+            }
+            catch(GardenException ex)
+            {
+                WriteErrorMessage(ex.Message);
+            }
+            UpdateUI();
+        }
+
+        private void RemoveWeedButton_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                _garden.RemoveWeed(_chosenTile.Item1, _chosenTile.Item2);
+            }
+            catch(GardenException ex)
+            {
+                WriteErrorMessage(ex.Message);
+            }
+            UpdateUI();
+        }
+
+        private void RemoveBugsButton_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                _garden.RemoveBugs(_chosenTile.Item1, _chosenTile.Item2);
+            }
+            catch (GardenException ex)
+            {
+                WriteErrorMessage(ex.Message);
+            }
+            UpdateUI();
+        }
+
+        private void CollectCoinsButton_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                _garden.CollectCoins(_chosenTile.Item1, _chosenTile.Item2);
+            }
+            catch (GardenException ex)
+            {
+                WriteErrorMessage(ex.Message);
+            }
+            UpdateUI();
+        }
+
+        private void RemoveFlowerButton_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                _garden.RemoveFlower(_chosenTile.Item1, _chosenTile.Item2);
+            }
+            catch (GardenException ex)
+            {
+                WriteErrorMessage(ex.Message);
+            }
+            UpdateUI();
+        }
+
+        private void AddSameSizeColumnStyle(TableLayoutPanel panel)
+        {
+            for (int i = 0; i < panel.ColumnCount; i++)
+            {
+                panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100 / panel.ColumnCount));
+            }
+        }
+
+        private void AddSameSizeRowStyle(TableLayoutPanel panel)
+        {
+            for (int i = 0; i < panel.RowCount; i++)
+            {
+                panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100 / panel.RowCount));
+            }
+        }
+
+        private void WriteErrorMessage(string message)
+        {
+            _errorMessage.Text = message;
+            _errorPanel.Visible = true;
+            UpdateUI();
         }
     }
 }
