@@ -357,10 +357,9 @@ namespace VirtualGarden
                 droughtEvent.IncrementNumberOfWateringsDoneToday();
             }
             tile.WaterFlower();
-            Player.playerStatistics.FlowersWatered++;
         }
 
-        public void WaterTile(int row, int column)
+        public void WaterFlower(int row, int column)
         {
             WaterFlower(GetTile(row, column));
         }

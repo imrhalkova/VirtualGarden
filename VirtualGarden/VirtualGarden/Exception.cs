@@ -86,8 +86,18 @@ namespace VirtualGarden
         internal FileException(string message) : base(message) { }
     }
 
-    public class UnableToLoadImageFromFileException : Exception
+    public class UnableToLoadImageFromFileException : FileException
     {
         internal UnableToLoadImageFromFileException(string message) : base(message) { }
+    }
+
+    public class UIException : Exception
+    {
+        internal UIException(string message) : base(message) { }
+    }
+
+    public class UnableToUpdateUIException : Exception
+    {
+        internal UnableToUpdateUIException(string message) : base(message) { }
     }
 }

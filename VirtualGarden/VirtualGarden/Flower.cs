@@ -50,9 +50,19 @@ namespace VirtualGarden
         public abstract List<BugsWeight<Bugs>> BugWeights { get; }
 
         /// <summary>
-        /// The filename of a file containing an image of this flower.
+        /// The filename of a file containing an image of this flower blooming.
         /// </summary>
-        public string ImageFilename { get; private set; }
+        public string BloomingImageFilename { get; private set; }
+
+        /// <summary>
+        /// The filename of a file containing an image of this flower growing.
+        /// </summary>
+        public string GrowingImageFilename { get; private set; } = "growing_flower.png";
+
+        /// <summary>
+        /// The filename of a file containing an image of this flower dead.
+        /// </summary>
+        public string DeadImageFilename { get; private set; } = "dead_flower.png";
 
         /// <summary>
         /// Maximum number of coins gained from the flower if it is not destroyed prematurely and the player collects coins from it every day.
@@ -73,7 +83,7 @@ namespace VirtualGarden
             GrowthDays = growthDays;
             BloomDays = bloomDays;
             DailyBloomIncome = dailyBloomIncome;
-            ImageFilename = imageFilename;
+            BloomingImageFilename = imageFilename;
         }
     }
 

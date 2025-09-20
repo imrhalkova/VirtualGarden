@@ -84,7 +84,7 @@ namespace VirtualGardenTests
 
             garden.GetTile(0, 0).SpawnWeed();
             garden.PlantFlower(0, 0, new TestFlower1());
-            garden.WaterTile(0, 0);
+            garden.WaterFlower(0, 0);
             garden.NewDay();
 
             Assert.Equal(FlowerState.Growing, garden.GetTile(0, 0).Flower.State);
@@ -98,12 +98,12 @@ namespace VirtualGardenTests
             garden.PlantFlower(0, 0, FlowerTypes.Daisy);
             for (int i = 0; i < FlowerTypes.Daisy.GrowthDays; i++)
             {
-                garden.WaterTile(0, 0);
+                garden.WaterFlower(0, 0);
                 garden.NewDay();
             }
             int previousBloomDays = garden.GetTile(0, 0).Flower.BloomDays;
             garden.GetTile(0, 0).SpawnWeed();
-            garden.WaterTile(0, 0);
+            garden.WaterFlower(0, 0);
             garden.NewDay();
 
             Assert.Equal(previousBloomDays, garden.GetTile(0, 0).Flower.BloomDays);

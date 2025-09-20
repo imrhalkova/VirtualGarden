@@ -18,7 +18,7 @@ namespace VirtualGarden
         /// </summary>
         public int NewDayIncome { get; private set; } = 10;
 
-        public PlayerStatistics playerStatistics = new PlayerStatistics();
+        public int NumberOfDay { get; set; } = 1;
 
         public Player(int startingCoins, int newDayIncome)
         {
@@ -30,7 +30,7 @@ namespace VirtualGarden
         public void Update()
         {
             Money += NewDayIncome;
-            playerStatistics.numberOfDay++;
+            NumberOfDay++;
         }
 
         public void AddMoney(int money)
@@ -43,11 +43,13 @@ namespace VirtualGarden
             Money -= money;
         }
 
-        public class PlayerStatistics
+        public void BuySeeds(Flower flower)
         {
-            public int numberOfDay { get; set; } = 1;
-            public int FlowersWatered { get; set; } = 0;
-            public PlayerStatistics() { }
+            if (flower.SeedPrice < Money)
+            {
+                throw new InsufficientFundsException($"Cannot buy and plant {flower.Name} seeds. Not enought money to buy them.");
+            }
+            SpendMoney(flower.SeedPrice);
         }
     }
 }
