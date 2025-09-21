@@ -14,10 +14,12 @@ namespace VirtualGarden
         private UIState _state;
         private TableLayoutPanel _gamePanel = new TableLayoutPanel();
         private TableLayoutPanel _mainMenuPanel = new TableLayoutPanel();
+        private TableLayoutPanel _gameMenuPanel = new TableLayoutPanel();
         private TableLayoutPanel _gardenPanel = new TableLayoutPanel();
         private TableLayoutPanel _errorPanel = new TableLayoutPanel();
         private TableLayoutPanel _tableWithBackButtonAndMoneyLabel = new TableLayoutPanel();
         private TableLayoutPanel _tileInfoPanel = new TableLayoutPanel();
+        private TableLayoutPanel _flowerCataloguePanel = new TableLayoutPanel();
         private Label _moneyLabel = new Label();
         private Label _moneyLabel2 = new Label();
         private Label _dayLabel = new Label();
@@ -56,11 +58,19 @@ namespace VirtualGarden
             {
                 case UIState.MAINMENU:
                     _mainMenuPanel.Visible = true;
+                    _gameMenuPanel.Visible = false;
+                    _gardenPanel.Visible = false;
+                    _tableWithBackButtonAndMoneyLabel.Visible = false;
+                    break;
+                case UIState.GAMEMENU:
+                    _mainMenuPanel.Visible = false;
+                    _gameMenuPanel.Visible = true;
                     _gardenPanel.Visible = false;
                     _tableWithBackButtonAndMoneyLabel.Visible = false;
                     break;
                 case UIState.GARDEN:
                     _mainMenuPanel.Visible= false;
+                    _gameMenuPanel.Visible= false;
                     _gardenPanel.Visible = true;
                     _tableWithBackButtonAndMoneyLabel.Visible = false;
                     _moneyLabel.Text = $"Money: {_garden.Player.Money}";
@@ -69,17 +79,30 @@ namespace VirtualGarden
                     break;
                 case UIState.TILE_INFO:
                     _mainMenuPanel.Visible = false;
+                    _gameMenuPanel.Visible = false;
                     _gardenPanel.Visible = false;
                     _tableWithBackButtonAndMoneyLabel.Visible = true;
                     _tileInfoPanel.Visible = true;
+                    _flowerCataloguePanel.Visible = false;
                     _moneyLabel2.Text = $"Money: {_garden.Player.Money}";
                     UpdateTileControls(_chosenTile);
                     UpdatePlantedFlowerControls(_chosenTile);
                     break;
                 case UIState.FLOWER_CATALOGUE:
                     _mainMenuPanel.Visible = false;
+                    _gameMenuPanel.Visible = false;
                     _gardenPanel.Visible = false;
-                    _tableWithBackButtonAndMoneyLabel.Visible = false;
+                    _tableWithBackButtonAndMoneyLabel.Visible = true;
+                    _tileInfoPanel.Visible = false;
+                    _flowerCataloguePanel.Visible = true;
+                    if (_chosenTile is not null)
+                    {
+                        SetControlsToVisible(_buyAndPlantButtons);
+                    }
+                    else
+                    {
+                        SetControlsToNotVisible(_buyAndPlantButtons);
+                    }
                     break;
             }
         }
@@ -97,6 +120,9 @@ namespace VirtualGarden
             //Add main menu
             _gamePanel.Controls.Add(CreateMainMenu(), 0, 0);
 
+            //Add game menu
+            _gamePanel.Controls.Add(CreateGameMenu(), 0, 0);
+
             //Add error panel
             CreateErrorPanel();
             _gamePanel.Controls.Add(_errorPanel, 0, 1);
@@ -106,12 +132,12 @@ namespace VirtualGarden
 
         private static class TileControls
         {
-            internal static Label RowLabel { get; } = new Label();
-            internal static Label ColumnLabel { get; } = new Label();
-            internal static Label FlowerLabel { get; } = new Label();
-            internal static Label WeedLabel { get; } = new Label();
-            internal static Label BugsLabel { get; } = new Label();
-            internal static Label CoinsLabel { get; } = new Label();
+            internal static Label RowLabel { get; } = CreateLabel();
+            internal static Label ColumnLabel { get; } = CreateLabel();
+            internal static Label FlowerLabel { get; } = CreateLabel();
+            internal static Label WeedLabel { get; } = CreateLabel();
+            internal static Label BugsLabel { get; } = CreateLabel();
+            internal static Label CoinsLabel { get; } = CreateLabel();
 
             internal static void Initialize()
             {
@@ -168,10 +194,10 @@ namespace VirtualGarden
 
         internal class PlantedFlowerControls
         {
-            internal Label GrowthDaysLabel { get; } = new Label();
-            internal Label BloomDaysLabel { get; } = new Label();
-            internal Label DaysSinceLastWateredLabel { get; } = new Label();
-            internal Label StateLabel { get; } = new Label();
+            internal Label GrowthDaysLabel { get; } = CreateLabel();
+            internal Label BloomDaysLabel { get; } = CreateLabel();
+            internal Label DaysSinceLastWateredLabel { get; } = CreateLabel();
+            internal Label StateLabel { get; } = CreateLabel();
             private PlantedFlowerControls()
             {
                 GrowthDaysLabel.TextAlign = ContentAlignment.MiddleCenter;
@@ -206,6 +232,7 @@ namespace VirtualGarden
             internal Button RemoveWeedButton { get; set; }
             internal Button RemoveBugsButton { get; set; }
             internal Button CollectCoinsButton { get; set; }
+            internal Button PlantFlowerButton {  get; set; }
             internal Button RemoveFlowerButton { get; set; }
             private TileUserButtons()
             {
@@ -213,6 +240,7 @@ namespace VirtualGarden
                 RemoveWeedButton = CreateButton("Remove weed");
                 RemoveBugsButton = CreateButton("Remove bugs");
                 CollectCoinsButton = CreateButton("Collect coins");
+                PlantFlowerButton = CreateButton("Plant Flower");
                 RemoveFlowerButton = CreateButton("Remove flower");
             }
             internal static TileUserButtons CreateTileUserButtons()
@@ -241,7 +269,7 @@ namespace VirtualGarden
                 SeedPriceLabel.TextAlign = ContentAlignment.MiddleLeft;
             }
 
-            internal static FlowerTypeControls CreateFlowerTypeControls(Flower flower)
+            internal static FlowerTypeControls CreateFlowerTypeControls(FlowerType flower)
             {
                 FlowerTypeControls controls = new FlowerTypeControls();
                 controls.NameLabel.Text = $"Name: {flower.Name}";
@@ -255,49 +283,75 @@ namespace VirtualGarden
             }
         }
 
+        private TableLayoutPanel CreateMenu()
+        {
+            TableLayoutPanel menu = new TableLayoutPanel();
+            menu.Dock = DockStyle.Fill;
+            menu.RowCount = 3;
+            menu.ColumnCount = 3;
+
+            menu.RowStyles.Add(new RowStyle(SizeType.Percent, 30));
+            menu.RowStyles.Add(new RowStyle(SizeType.Percent, 40));
+            menu.RowStyles.Add(new RowStyle(SizeType.Percent, 30));
+            menu.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
+            menu.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+            menu.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
+
+            return menu;
+        }
+
         private Panel CreateMainMenu()
         {
-            _mainMenuPanel.Dock = DockStyle.Fill;
-            _mainMenuPanel.RowCount = 3;
-            _mainMenuPanel.ColumnCount = 3;
+            _mainMenuPanel = CreateMenu();
 
-            _mainMenuPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 30));
-            _mainMenuPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 40));
-            _mainMenuPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 30));
-            _mainMenuPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
-            _mainMenuPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
-            _mainMenuPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
-
-            TableLayoutPanel buttonPanel = new TableLayoutPanel();
-            buttonPanel.RowCount = 3;
-            buttonPanel.ColumnCount = 1;
-            buttonPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 34));
-            buttonPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 33));
-            buttonPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 33));
-
-            Button newGameButton = new Button();
-            newGameButton.Dock = DockStyle.Fill;
+            Button newGameButton = CreateButton("New game");
             newGameButton.Click += NewGameButton_Click;
-            newGameButton.Text = "New Game";
-            newGameButton.BackColor = Color.MistyRose;
-            buttonPanel.Controls.Add(newGameButton, 1, 0);
 
-            Button loadGameButton = new Button();
-            loadGameButton.Dock = DockStyle.Fill;
+            Button loadGameButton = CreateButton("Load game");
             loadGameButton.Click += LoadGameButton_Click;
-            loadGameButton.Text = "Load Game";
-            loadGameButton.BackColor = Color.MistyRose;
-            buttonPanel.Controls.Add(loadGameButton, 1, 1);
 
-            Button exitGameButton = new Button();
-            exitGameButton.Dock = DockStyle.Fill;
+            Button exitGameButton = CreateButton("Exit");
             exitGameButton.Click += ExitGameButton_Click;
-            exitGameButton.Text = "Exit";
-            exitGameButton.BackColor = Color.MistyRose;
-            buttonPanel.Controls.Add(exitGameButton, 1, 2);
+
+            List<Button> menuButtons = new List<Button> { newGameButton, loadGameButton, exitGameButton };
+            Panel buttonPanel = CreateButtonPanel(menuButtons);
 
             _mainMenuPanel.Controls.Add(buttonPanel, 1, 1);
             return _mainMenuPanel;
+        }
+
+        private Panel CreateGameMenu()
+        {
+            _gameMenuPanel = CreateMenu();
+            Button resumeButton = CreateButton("Resume");
+            resumeButton.Click += ResumeButton_Click;
+
+            Button saveButton = CreateButton("Save game");
+            saveButton.Click += SaveButton_Click;
+
+            Button exitButton = CreateButton("Exit");
+            exitButton.Click += ExitGameButton_Click;
+
+            List<Button> menuButtons = new List<Button> { resumeButton, saveButton, exitButton };
+            Panel buttonPanel = CreateButtonPanel(menuButtons);
+
+            _gameMenuPanel.Controls.Add(buttonPanel, 1, 1);
+            return _gameMenuPanel;
+        }
+
+
+        private Panel CreateButtonPanel(List<Button> buttons)
+        {
+            TableLayoutPanel buttonPanel = new TableLayoutPanel();
+            buttonPanel.Dock = DockStyle.Fill;
+            buttonPanel.RowCount = buttons.Count();
+            buttonPanel.ColumnCount = 1;
+            AddSameSizeRowStyle(buttonPanel);
+            for (int i = 0; i < buttonPanel.RowCount; i++)
+            {
+                buttonPanel.Controls.Add(buttons[i], 0, i);
+            }
+            return buttonPanel;
         }
 
         /// <summary>
@@ -394,9 +448,11 @@ namespace VirtualGarden
             buttonRow.ColumnCount = 2;
             AddSameSizeColumnStyle(buttonRow);
             Button menuButton = CreateButton("Menu");
+            menuButton.Click += menuButton_Click;
             buttonRow.Controls.Add(menuButton, 1, 0);
-            Button flowerCatalogue = CreateButton("Flower catalogue");
-            buttonRow.Controls.Add(flowerCatalogue, 0, 0);
+            Button flowerCatalogueButton = CreateButton("Flower catalogue");
+            flowerCatalogueButton.Click += FlowerCatalogueButton_Click;
+            buttonRow.Controls.Add(flowerCatalogueButton, 0, 0);
             playerStatsPanel.Controls.Add(buttonRow, 0, 0);
 
             Color playerStatsBackColor = Color.PowderBlue;
@@ -459,12 +515,13 @@ namespace VirtualGarden
 
             _tableWithBackButtonAndMoneyLabel.Controls.Add(CreateBackButtonAndMoneyLabelRow(), 0, 0);
             _tableWithBackButtonAndMoneyLabel.Controls.Add(CreateTileInfoPanel(), 0, 1);
+            _tableWithBackButtonAndMoneyLabel.Controls.Add(CreateFlowerCataloguePanel(), 0, 1);
             return _tableWithBackButtonAndMoneyLabel;
         }
 
         private Panel CreateBackButtonAndMoneyLabelRow()
         {
-            Button backButton = CreateButton("Back");
+            Button backButton = CreateButton("Back to garden");
             backButton.Click += BackButton_Click;
 
             TableLayoutPanel backButtonTable = new TableLayoutPanel();
@@ -545,7 +602,7 @@ namespace VirtualGarden
         {
             TableLayoutPanel tileUserButtonsPanel = new TableLayoutPanel();
             tileUserButtonsPanel.RowCount = 1;
-            tileUserButtonsPanel.ColumnCount = 5;
+            tileUserButtonsPanel.ColumnCount = 6;
             tileUserButtonsPanel.Dock = DockStyle.Fill;
             AddSameSizeColumnStyle(tileUserButtonsPanel);
 
@@ -553,26 +610,23 @@ namespace VirtualGarden
             _tileUserButtons.RemoveWeedButton.Click += RemoveWeedButton_Click;
             _tileUserButtons.RemoveBugsButton.Click += RemoveBugsButton_Click;
             _tileUserButtons.CollectCoinsButton.Click += CollectCoinsButton_Click;
+            _tileUserButtons.PlantFlowerButton.Click += PlantFlowerButton_Click;
             _tileUserButtons.RemoveFlowerButton.Click += RemoveFlowerButton_Click;
 
             tileUserButtonsPanel.Controls.Add(_tileUserButtons.WaterFlowerButton, 0, 0);
             tileUserButtonsPanel.Controls.Add(_tileUserButtons.RemoveWeedButton, 1, 0);
             tileUserButtonsPanel.Controls.Add(_tileUserButtons.RemoveBugsButton, 2, 0);
             tileUserButtonsPanel.Controls.Add(_tileUserButtons.CollectCoinsButton, 3, 0);
-            tileUserButtonsPanel.Controls.Add(_tileUserButtons.RemoveFlowerButton, 4, 0);
+            tileUserButtonsPanel.Controls.Add(_tileUserButtons.PlantFlowerButton, 4, 0);
+            tileUserButtonsPanel.Controls.Add(_tileUserButtons.RemoveFlowerButton, 5, 0);
 
             return tileUserButtonsPanel;
         }
 
-        private void CreateFlowerCatalogue()
-        {
-
-        }
-
         private Panel CreateFlowerCataloguePanel()
         {
-            TableLayoutPanel flowerCataloguePanel = new TableLayoutPanel();
-            flowerCataloguePanel.Dock = DockStyle.Fill;
+            
+            _flowerCataloguePanel.Dock = DockStyle.Fill;
 
             Type flowerTypes = typeof(FlowerTypes);
             FieldInfo[] flowerTypesFields = flowerTypes.GetFields(BindingFlags.Public | BindingFlags.Static);
@@ -581,46 +635,52 @@ namespace VirtualGarden
             for ( int i = 0; i < flowerTypesFields.Length; i++ )
             {
                 object? fieldValue = flowerTypesFields[i].GetValue(null);
-                if (fieldValue is Flower flower)
+                if (fieldValue is FlowerType flower)
                 flowerTypePanels.Add(CreateFlowerTypePanel(flower));
             }
 
             //More catalogue pages are needed if more flowers are added
-            flowerCataloguePanel.ColumnCount = 5;
-            flowerCataloguePanel.RowCount = 2;
+            _flowerCataloguePanel.ColumnCount = 5;
+            _flowerCataloguePanel.RowCount = 2;
+            AddSameSizeColumnStyle(_flowerCataloguePanel);
+            AddSameSizeRowStyle(_flowerCataloguePanel);
             int flowerTypePanelIndex = 0;
-            for (int i = 0; i < flowerCataloguePanel.RowCount; i++)
+            for (int i = 0; i < _flowerCataloguePanel.RowCount; i++)
             {
-                for (int j = 0; j < flowerCataloguePanel.ColumnCount; j++)
+                for (int j = 0; j < _flowerCataloguePanel.ColumnCount; j++)
                 {
-                    flowerCataloguePanel.Controls.Add(flowerTypePanels[flowerTypePanelIndex], j, i);
+                    if (flowerTypePanelIndex >= flowerTypePanels.Count)
+                    {
+                        //all flower panels have been put into the table
+                        break;
+                    }
+                    _flowerCataloguePanel.Controls.Add(flowerTypePanels[flowerTypePanelIndex], j, i);
+                    flowerTypePanelIndex++;
                 }
             }
-
-            return flowerCataloguePanel;
+            return _flowerCataloguePanel;
         }
 
-        private TableLayoutPanel CreateFlowerTypePanel(Flower flower)
+        private TableLayoutPanel CreateFlowerTypePanel(FlowerType flower)
         {
             TableLayoutPanel flowerTypePanel = new TableLayoutPanel();
             flowerTypePanel.Dock = DockStyle.Fill;
+            
             FlowerTypeControls flowerTypeControls = FlowerTypeControls.CreateFlowerTypeControls(flower);
             Type type = typeof(FlowerTypeControls);
             PropertyInfo[] flowerTypeControlsProperties = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
             flowerTypePanel.RowCount = flowerTypeControlsProperties.Length + 1; //+1 fot the buy button
             flowerTypePanel.ColumnCount = 1;
-            flowerTypePanel.BackColor = Color.Blue;
+            AddSameSizeRowStyle(flowerTypePanel);
             for ( int i = 0; i < flowerTypeControlsProperties.Length; i++)
             {
                 if (flowerTypeControlsProperties[i].GetValue(flowerTypeControls) is Label label)
                 flowerTypePanel.Controls.Add(label, 0, i);
             }
-            //add buy button
             Button buyAndPlantButton = CreateButton("Buy seeds and plant");
             buyAndPlantButton.Click += (s, e) => buyAndPlantButton_Click(flower);
             _buyAndPlantButtons.Add(buyAndPlantButton);
-            buyAndPlantButton.Visible = false;
             flowerTypePanel.Controls.Add(buyAndPlantButton, 0, flowerTypeControlsProperties.Length);
 
             return flowerTypePanel;
@@ -686,6 +746,7 @@ namespace VirtualGarden
                 for (int j = 0; j < _tileButtons.GetLength(1); j++)
                 {
                     _tileButtons[i, j].Text = "";
+                    _tileButtons[i, j].Image = null;
                     Tile tile = _garden.GetTile(i, j);
 
                     if (tile.HasWeed)
@@ -700,25 +761,42 @@ namespace VirtualGarden
                     if (tile.Flower is not null)
                     {
                         FlowerState flowerState = tile.Flower.State;
-                        string imageFilename = "";
-                        string path;
+                        string flowerImageFilename = "";
                         switch (flowerState)
                         {
                             case FlowerState.Growing:
-                                imageFilename = tile.Flower.FlowerType.GrowingImageFilename;
+                                flowerImageFilename = tile.Flower.FlowerType.GrowingImageFilename;
                                 break;
                             case FlowerState.Blooming:
-                                imageFilename = tile.Flower.FlowerType.BloomingImageFilename;
+                                flowerImageFilename = tile.Flower.FlowerType.BloomingImageFilename;
                                 break;
                             case FlowerState.Dead:
-                                imageFilename = tile.Flower.FlowerType.DeadImageFilename;
+                                flowerImageFilename = tile.Flower.FlowerType.DeadImageFilename;
                                 break;
                         }
-                        path = Path.Combine(_picturesPath, imageFilename);
+                        string flowerImagePath = Path.Combine(_picturesPath, flowerImageFilename);
+
+                        string? bugsImageFilename = null;
+                        if (tile.Bugs is not null)
+                        {
+                            bugsImageFilename = tile.Bugs.Bugs.ImageFilename;
+                        }
                         try
                         {
-                            Image image = FileHandler.GetImageFromFile(path);
-                            PutImageOnTile(image, _tileButtons[i, j]);
+                            Image finalImage;
+                            Image flowerImage = FileHandler.GetImageFromFile(flowerImagePath);
+                            Image bugsImage;
+                            if (bugsImageFilename is not null)
+                            {
+                                string bugsImagePath = Path.Combine(_picturesPath, bugsImageFilename);
+                                bugsImage = FileHandler.GetImageFromFile(bugsImagePath);
+                                finalImage = CombineImages(flowerImage, bugsImage);
+                            }
+                            else
+                            {
+                                finalImage = flowerImage;
+                            }
+                            PutImageOnTile(finalImage, _tileButtons[i, j]);
                         }
                         catch (FileException ex)
                         {
@@ -848,6 +926,16 @@ namespace VirtualGarden
             UpdateUI();
         }
 
+        private void PlantFlowerButton_Click(object? sender, EventArgs e)
+        {
+            if (_chosenTile is null)
+            {
+                throw new UnableToUpdateUIException($"Cannot plant flower on a tile. No tile is selected");
+            }
+            _state = UIState.FLOWER_CATALOGUE;
+            UpdateUI();
+        }
+
         private void RemoveFlowerButton_Click(object? sender, EventArgs e)
         {
             if (_chosenTile is null)
@@ -891,8 +979,8 @@ namespace VirtualGarden
         /// <summary>
         /// Buys flower seeds and plants them on the chosen tile.
         /// </summary>
-        /// <param name="flower"></param>
-        private void buyAndPlantButton_Click(Flower flower)
+        /// <param name="flower">The type of the flower to be planted on the chosen tile.</param>
+        private void buyAndPlantButton_Click(FlowerType flower)
         {
             if (_chosenTile is null)
             {
@@ -917,6 +1005,57 @@ namespace VirtualGarden
                 WriteErrorMessage(ex.Message);
             }
             UpdateUI();
+        }
+
+        private void menuButton_Click(object? sender, EventArgs e)
+        {
+            _state = UIState.GAMEMENU;
+            UpdateUI();
+        }
+
+        private void FlowerCatalogueButton_Click(object? sender, EventArgs e)
+        {
+            _state = UIState.FLOWER_CATALOGUE;
+            UpdateUI();
+        }
+
+        private void SetControlsToVisible(IEnumerable<Control> controls)
+        {
+            foreach (var control in controls)
+            {
+                control.Visible = true;
+            }
+        }
+
+        private void SetControlsToNotVisible(IEnumerable<Control> controls)
+        {
+            foreach (var control in controls)
+            {
+                control.Visible = false;
+            }
+        }
+
+        private Image CombineImages(Image image1, Image image2)
+        {
+            Bitmap bitmap = new Bitmap(image1.Width, image1.Height);
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.DrawImage(image1, 0, 0, image1.Width, image1.Height);
+                g.DrawImage(image2, 0, 0, image2.Width, image2.Height);
+            }
+            return bitmap;
+        }
+
+        private void ResumeButton_Click(object? sender, EventArgs e)
+        {
+            _state = UIState.GARDEN;
+            UpdateUI();
+        }
+
+        private void SaveButton_Click(object? sender, EventArgs e)
+        {
+            //save the garden using reflection
+            throw new NotImplementedException();
         }
     }
 }

@@ -9,9 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="pictures\arum_lily.png" />
+    <None Remove="pictures\bugs.png" />
     <None Remove="pictures\daisy.png" />
     <None Remove="pictures\dead_flower.png" />
     <None Remove="pictures\growing_flower.png" />
+    <None Remove="pictures\hydrangea.png" />
     <None Remove="pictures\marigold.png" />
     <None Remove="pictures\petunia.png" />
     <None Remove="pictures\rose.png" />
@@ -20,6 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="pictures\arum_lily.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="pictures\bugs.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="pictures\daisy.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -27,6 +36,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="pictures\growing_flower.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="pictures\hydrangea.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="pictures\marigold.png">

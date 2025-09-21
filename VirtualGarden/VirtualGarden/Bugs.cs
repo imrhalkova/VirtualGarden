@@ -11,32 +11,34 @@ namespace VirtualGarden
         public string Name { get; private set; }
         public int SprayPrice { get; set; }
         public int DaysUntilFlowerDies { get; set; }
-        public Bugs(string name, int sprayPrice, int daysUntilFlowerDies)
+        public string ImageFilename { get; set; }
+        public Bugs(string name, int sprayPrice, int daysUntilFlowerDies, string imageFilename)
         {
             Name = name;
             SprayPrice = sprayPrice;
             DaysUntilFlowerDies = daysUntilFlowerDies;
+            ImageFilename = imageFilename;
         }
     }
 
     public class CommonBugs : Bugs
     {
-        public CommonBugs() : base("Common bugs", 5, 3) { }
+        public CommonBugs() : base("Common bugs", 5, 3, "bugs.png") { }
     }
 
     public class GardenBugs : Bugs
     {
-        public GardenBugs() : base("Garden bugs", 90, 3) { }
+        public GardenBugs() : base("Garden bugs", 90, 3, "bugs.png") { }
     }
 
     public class ExoticBugs : Bugs
     {
-        public ExoticBugs() : base("Exotic bugs", 250, 1) { }
+        public ExoticBugs() : base("Exotic bugs", 250, 1, "bugs.png") { }
     }
 
     public class TropicalBugs : Bugs
     {
-        public TropicalBugs() : base("Tropical Bugs", 350, 3) { }
+        public TropicalBugs() : base("Tropical Bugs", 350, 3, "bugs.png") { }
     }
 
     public static class BugTypes

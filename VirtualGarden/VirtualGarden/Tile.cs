@@ -38,7 +38,7 @@ namespace VirtualGarden
             return $"[{Row}, {Column}]";
         }
 
-        public void PlantFlower(Flower flower)
+        public void PlantFlower(FlowerType flower)
         {
             if (Flower is not null)
             {
@@ -54,6 +54,7 @@ namespace VirtualGarden
                 throw new FlowerNotPresentException($"Cannot remove flower from tile {PrintCoordinates()}. There is no flower on this tile.");
             }
             Flower = null;
+            Bugs = null;
         }
 
         public void WaterFlower()
@@ -163,11 +164,8 @@ namespace VirtualGarden
             {
                 throw new FlowerNotPresentException($"Cannot kill flower on tile {PrintCoordinates()}. There is no flower on this tile.");
             }
-            if (Flower.State == FlowerState.Dead)
-            {
-                throw new KillingAlreadyDeadFlowerException($"Cannot kill flower on tile {PrintCoordinates()}. This flower is already dead.");
-            }
             Flower.State = FlowerState.Dead;
+            Bugs = null;
         }
 
         private void KillFadedFlower()

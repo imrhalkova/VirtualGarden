@@ -43,9 +43,9 @@ namespace VirtualGarden
             Money -= money;
         }
 
-        public void BuySeeds(Flower flower)
+        public void BuySeeds(FlowerType flower)
         {
-            if (flower.SeedPrice < Money)
+            if (flower.SeedPrice > Money)
             {
                 throw new InsufficientFundsException($"Cannot buy and plant {flower.Name} seeds. Not enought money to buy them.");
             }

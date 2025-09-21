@@ -9,9 +9,9 @@ namespace VirtualGarden
 {
     /// <summary>
     /// The abstract class from which all Flowers inherit.
-    /// The Flower classes consist of information common for all instances of said flower.
+    /// The FlowerType classes consist of information common for all instances of said flower.
     /// </summary>
-    public abstract class Flower
+    public abstract class FlowerType
     {
         /// <summary>
         /// The name of this type of flower
@@ -75,7 +75,7 @@ namespace VirtualGarden
             }
         }
 
-        protected Flower(string name, int seedPrice, int daysBetweenWatering, int growthDays, int bloomDays, int dailyBloomIncome, string imageFilename) 
+        protected FlowerType(string name, int seedPrice, int daysBetweenWatering, int growthDays, int bloomDays, int dailyBloomIncome, string imageFilename) 
         { 
             Name = name;
             SeedPrice = seedPrice;
@@ -87,7 +87,7 @@ namespace VirtualGarden
         }
     }
 
-    public class Daisy : Flower
+    public class Daisy : FlowerType
     {
         public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         { 
@@ -99,7 +99,7 @@ namespace VirtualGarden
         public Daisy() : base("Daisy", 5, 0, 5, 3, 5, "daisy.png") { }
     }
 
-    public class Marigold : Flower
+    public class Marigold : FlowerType
     {
         public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         {
@@ -111,7 +111,7 @@ namespace VirtualGarden
         public Marigold() : base("Marigold", 20, 1, 6, 6, 5, "marigold.png") { }
     }
 
-    public class Sunflower : Flower
+    public class Sunflower : FlowerType
     {
         public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         {
@@ -123,7 +123,7 @@ namespace VirtualGarden
         public Sunflower() : base("Sunflower", 50, 2, 8, 10, 13, "sunflower.png") { }
     }
 
-    public class Petunia : Flower
+    public class Petunia : FlowerType
     {
         public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         {
@@ -135,7 +135,7 @@ namespace VirtualGarden
         public Petunia() : base("Petunia", 80, 1, 9, 10, 20, "petunia.png") { }
     }
 
-    public class Rose : Flower
+    public class Rose : FlowerType
     {
         public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         {
@@ -147,7 +147,7 @@ namespace VirtualGarden
         public Rose() : base("Rose", 300, 0, 20, 5, 180, "rose.png") { }
     }
 
-    public class Tulip : Flower
+    public class Tulip : FlowerType
     {
         public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         {
@@ -162,19 +162,19 @@ namespace VirtualGarden
     //The FlowerTypes class contains instances of all flowers that inherit from Flower
     public static class FlowerTypes
     {
-        public static Flower Daisy = new Daisy();
-        public static Flower Marigold = new Marigold();
-        public static Flower Sunflower = new Sunflower();
-        public static Flower Petunia = new Petunia();
-        public static Flower Rose = new Rose();
-        public static Flower Tulip = new Tulip();
+        public static FlowerType Daisy = new Daisy();
+        public static FlowerType Marigold = new Marigold();
+        public static FlowerType Sunflower = new Sunflower();
+        public static FlowerType Petunia = new Petunia();
+        public static FlowerType Rose = new Rose();
+        public static FlowerType Tulip = new Tulip();
     }
 
     //The PlantedFlower class contains info specific to instances of a flower planted
     public class PlantedFlower
     {
         //The type of which this flower is (e.g. Daisy, Rose), contains info that is the same for every flower of this type
-        public Flower FlowerType { get; private set; }
+        public FlowerType FlowerType { get; private set; }
 
         //The number of days this flower has grown
         public int GrowthDays { get; set; }
@@ -189,7 +189,7 @@ namespace VirtualGarden
         DaysSinceLastWatered is updated after the flower states so that flowers are properly killed.*/
         public int DaysSinceLastWatered { get; set;}
 
-        public PlantedFlower(Flower flower)
+        public PlantedFlower(FlowerType flower)
         {
             FlowerType = flower;
             GrowthDays = 0;

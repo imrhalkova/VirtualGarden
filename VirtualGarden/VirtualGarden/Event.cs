@@ -92,44 +92,4 @@ namespace VirtualGarden
             WeedChanceMultiply = weedChanceMultiply;
         }
     }
-
-    public class WildRabbitEvent : Event
-    {
-        public override string Name { get; } = "A Wild Rabbit";
-        public override string Description { get; } = "A wild rabbit has wandered into your garden. If you don't do anything about it, it might eat one of your flowers. You can leave the rabbit be, give it food, chase it away or take care of the problem more permanently...";
-
-        public static bool IsAlive = true;
-        private Garden _garden;
-        public string? rabbitName { get; private set; }
-        public WildRabbitEvent(int daysLeft, Garden garden) : base(daysLeft)
-        {
-            _garden = garden;
-        }
-
-        public new void Update()
-        {
-            double flowerEatenChance = _garden.Rand.NextDouble();
-            if (_garden.Rand.NextDouble() < flowerEatenChance)
-            {
-                int numberOfFlowerToBeEaten = _garden.Rand.Next(1, _garden.FlowerCount);
-                _garden.KillFlower(numberOfFlowerToBeEaten);
-            }
-            base.Update();
-        }
-
-        public void KillTheRabbit()
-        {
-            if (!IsAlive)
-            {
-                throw new KillingAlreadyDeadRabbitException($"Cannot kill the wild rabbit. It is already dead.");
-            }
-            IsAlive = false;
-            //update event chances to 0
-        }
-
-        public void RenameTheRabbit(string name)
-        {
-            rabbitName = name;
-        }
-    }
 }

@@ -38,7 +38,7 @@ namespace VirtualGardenTests
     }
 
     //A flower for testing that grows and blooms for one day and has to be watered every day
-    internal class TestFlower1 : Flower
+    internal class TestFlower1 : FlowerType
     {
         public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
         {

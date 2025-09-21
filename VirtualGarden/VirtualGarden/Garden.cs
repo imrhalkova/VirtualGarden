@@ -19,7 +19,7 @@ namespace VirtualGarden
         public Player Player {  get; private set; }
 
         //The probability that weeds will be spawned on one empty tile the next day with no active event affecting weed spawning.
-        private double _normalWeedChance = 0.15;
+        private double _normalWeedChance = 0.10;
 
         /// <summary>
         /// The probability that weeds will be spawned on one empty tile the next day.
@@ -57,7 +57,7 @@ namespace VirtualGarden
         /// <summary>
         /// The probability of weed spreading to this tile if one adjacent tile has weed.
         /// </summary>
-        public double WeedSpreadChance { get; private set; } = 0.5;
+        public double WeedSpreadChance { get; private set; } = 0.35;
 
         /// <summary>
         /// A random number generator used for making decisions in the garden that have certain probabilities - spawning and spreading
@@ -320,7 +320,7 @@ namespace VirtualGarden
             return GetIndexesOfAdjacentTiles(pos.Item1, pos.Item2);
         }
 
-        public void PlantFlower(Tile tile, Flower flower)
+        public void PlantFlower(Tile tile, FlowerType flower)
         {
             tile.PlantFlower(flower);
             if (_event is RainEvent)
@@ -329,15 +329,15 @@ namespace VirtualGarden
             }
         }
 
-        public void PlantFlower(int row, int column, Flower flower)
+        public void PlantFlower(int row, int column, FlowerType flower)
         {
             PlantFlower(GetTile(row, column), flower);
         }
 
         public void CollectCoins(Tile tile)
         {
-            tile.CollectCoins();
             Player.AddMoney(tile.Coins);
+            tile.CollectCoins();
         }
 
         public void CollectCoins(int row, int column)
@@ -425,25 +425,6 @@ namespace VirtualGarden
         public void EndEvent()
         {
             _event = null;
-        }
-
-        public void ChaseTheRabitAway()
-        {
-            if (_event is not WildRabbitEvent)
-            {
-                throw new WildRabbitEventNotActiveException($"Cannot chase the wild rabbit away. It is not in the garden.");
-            }
-            EndEvent();
-        }
-
-        public void KillTheRabit()
-        {
-            if (_event is not WildRabbitEvent)
-            {
-                throw new WildRabbitEventNotActiveException($"Cannot kill the wild rabbit. The wild rabbit is not currently in the garden.");
-            }
-            WildRabbitEvent wildRabbitEvent = (WildRabbitEvent) _event;
-            wildRabbitEvent.KillTheRabbit(); // :(
         }
 
         public void KillFlower(int numberOfFlowerToBeKilled)
