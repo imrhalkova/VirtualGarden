@@ -16,9 +16,12 @@ namespace VirtualGarden
         private TableLayoutPanel _mainMenuPanel = new TableLayoutPanel();
         private TableLayoutPanel _gameMenuPanel = new TableLayoutPanel();
         private TableLayoutPanel _gardenPanel = new TableLayoutPanel();
+        private TableLayoutPanel _eventPanel = new TableLayoutPanel();
+        private EventPanelControls _eventPanelControls;
         private TableLayoutPanel _errorPanel = new TableLayoutPanel();
         private TableLayoutPanel _tableWithBackButtonAndMoneyLabel = new TableLayoutPanel();
         private TableLayoutPanel _tileInfoPanel = new TableLayoutPanel();
+        private TableLayoutPanel _tileFlowerInfo = new TableLayoutPanel();
         private TableLayoutPanel _flowerCataloguePanel = new TableLayoutPanel();
         private Label _moneyLabel = new Label();
         private Label _moneyLabel2 = new Label();
@@ -30,6 +33,7 @@ namespace VirtualGarden
         private PlantedFlowerControls _plantedFlowerControls = PlantedFlowerControls.CreatePlantedFlowerControls();
         private TileUserButtons _tileUserButtons = TileUserButtons.CreateTileUserButtons();
         private List<Button> _buyAndPlantButtons = new List<Button>();
+        private List<FlowerBloomCountLabel> _bloomCountLabels = new List<FlowerBloomCountLabel>();
         private Tile? _chosenTile {  get; set; }
 
         private readonly Color _defaultTileColor = Color.SaddleBrown;
@@ -76,17 +80,43 @@ namespace VirtualGarden
                     _moneyLabel.Text = $"Money: {_garden.Player.Money}";
                     _dayLabel.Text = $"Day: {_garden.Player.NumberOfDay}";
                     UpdateTilesUI();
+                    if (_garden.Event is not null)
+                    {
+                        _eventPanel.Visible = true;
+                        _eventPanelControls.Update(_garden.Event);
+                    }
+                    else
+                    {
+                        _eventPanel.Visible = false;
+                    }
+                    UpdateBloomCountLabels();
                     break;
                 case UIState.TILE_INFO:
+
+                    if (_chosenTile is null)
+                    {
+                        throw new NoTileIsSelectedUIException($"Cannot be in state {UIState.TILE_INFO}. No tile is selected");
+                    }
+
                     _mainMenuPanel.Visible = false;
                     _gameMenuPanel.Visible = false;
                     _gardenPanel.Visible = false;
                     _tableWithBackButtonAndMoneyLabel.Visible = true;
                     _tileInfoPanel.Visible = true;
+
+                    if (_chosenTile.Flower is not null)
+                    {
+                        _tileFlowerInfo.Visible = true;
+                        UpdatePlantedFlowerControls(_chosenTile);
+                    }
+                    else
+                    {
+                        _tileFlowerInfo.Visible= false;
+                    }
+
                     _flowerCataloguePanel.Visible = false;
                     _moneyLabel2.Text = $"Money: {_garden.Player.Money}";
                     UpdateTileControls(_chosenTile);
-                    UpdatePlantedFlowerControls(_chosenTile);
                     break;
                 case UIState.FLOWER_CATALOGUE:
                     _mainMenuPanel.Visible = false;
@@ -155,7 +185,7 @@ namespace VirtualGarden
         {
             if (tile is null)
             {
-                throw new UnableToUpdateUIException($"Cannot update tile controls. No tile is celected.");
+                throw new NoTileIsSelectedUIException($"Cannot update tile controls. No tile is celected.");
             }
             int row = tile.Row;
             int column = tile.Column;
@@ -186,7 +216,7 @@ namespace VirtualGarden
             }
             else
             {
-                TileControls.BugsLabel.Text = $"Has bugs (spray price: {tile.Bugs.Bugs.SprayPrice})";
+                TileControls.BugsLabel.Text = $"Has bugs (spray price: {tile.Bugs.Bugs.SprayPrice}). Days until the flower is dead: {tile.Bugs.DaysUntilFlowerDies}";
             }
 
             TileControls.CoinsLabel.Text = $"Coins: {tile.Coins}";
@@ -215,7 +245,7 @@ namespace VirtualGarden
         {
             if (tile is null)
             {
-                throw new UnableToUpdateUIException($"Cannot update planted flower controls. No tile is selected.");
+                throw new NoTileIsSelectedUIException($"Cannot update planted flower controls. No tile is selected.");
             }
             if (tile.Flower is not null)
             {
@@ -405,8 +435,14 @@ namespace VirtualGarden
             //Add panel with player stats
             _gardenPanel.Controls.Add(CreatePlayerPanel(), 2, 0);
 
+            //Add panel for displaying events
+            _gardenPanel.Controls.Add(CreateEventPanel(), 0, 1);
+
             //Add the grid of tiles
             _gardenPanel.Controls.Add(CreateTilesGridPanel(), 1, 1);
+
+            //Add bloom count panel
+            _gardenPanel.Controls.Add(CreateBloomCountPanel(), 2, 1);
 
             _gamePanel.Controls.Add(_gardenPanel, 0, 0);
 
@@ -467,6 +503,54 @@ namespace VirtualGarden
             playerStatsPanel.Controls.Add(_dayLabel, 0, 2);
 
             return playerStatsPanel;
+        }
+
+        internal class EventPanelControls
+        {
+            internal Label Name { get; } = CreateLabel();
+            internal Label Description { get; } = CreateLabel();
+            internal Label DaysLeft { get; } = CreateLabel();
+            internal Label AdditionalLabel { get; } = CreateLabel();
+            internal EventPanelControls()
+            {
+                Name.TextAlign = ContentAlignment.TopLeft;
+                Description.TextAlign = ContentAlignment.TopLeft;
+            }
+            internal void Update(Event activeEvent)
+            {
+                Name.Text = $"Name: {activeEvent.Name}";
+                Description.Text = $"Description: {activeEvent.Description}";
+                DaysLeft.Text = $"Number of days left: {activeEvent.DaysLeft}";
+                if (activeEvent is DroughtEvent droughtEvent)
+                {
+                    AdditionalLabel.Visible = true;
+                    AdditionalLabel.Text = $"Number of flowers that can be watered: {droughtEvent.NumberOfRemainingWaterings}";
+                }
+                else
+                {
+                    AdditionalLabel.Visible = false;
+                }
+            }
+        }
+
+        private Panel CreateEventPanel()
+        {
+            _eventPanel.Dock = DockStyle.Fill;
+            _eventPanel.BackColor = Color.Azure;
+            _eventPanelControls = new EventPanelControls();
+
+            Type type = typeof(EventPanelControls);
+            PropertyInfo[] eventPanelControlsProperties = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            _eventPanel.RowCount = eventPanelControlsProperties.Length;
+            _eventPanel.ColumnCount = 1;
+            AddSameSizeRowStyle(_eventPanel);
+            for (int i = 0; i < eventPanelControlsProperties.Length; i++)
+            {
+                if (eventPanelControlsProperties[i].GetValue(_eventPanelControls) is Label label)
+                    _eventPanel.Controls.Add(label, 0, i);
+            }
+            return _eventPanel;
         }
 
         private Panel CreateTilesGridPanel()
@@ -583,19 +667,18 @@ namespace VirtualGarden
 
         private Panel CreateTileFlowerInfoPanel()
         {
-            TableLayoutPanel tileFlowerInfo = new TableLayoutPanel();
-            tileFlowerInfo.Dock = DockStyle.Fill;
-            tileFlowerInfo.RowCount = 4;
-            tileFlowerInfo.ColumnCount = 1;
-            for (int i = 0; i < tileFlowerInfo.RowCount; i++)
+            _tileFlowerInfo.Dock = DockStyle.Fill;
+            _tileFlowerInfo.RowCount = 4;
+            _tileFlowerInfo.ColumnCount = 1;
+            for (int i = 0; i < _tileFlowerInfo.RowCount; i++)
             {
-                tileFlowerInfo.RowStyles.Add(new RowStyle(SizeType.Percent, 100 / tileFlowerInfo.RowCount));
+                _tileFlowerInfo.RowStyles.Add(new RowStyle(SizeType.Percent, 100 / _tileFlowerInfo.RowCount));
             }
-            tileFlowerInfo.Controls.Add(_plantedFlowerControls.GrowthDaysLabel, 0, 0);
-            tileFlowerInfo.Controls.Add(_plantedFlowerControls.BloomDaysLabel, 0, 1);
-            tileFlowerInfo.Controls.Add(_plantedFlowerControls.DaysSinceLastWateredLabel, 0, 2);
-            tileFlowerInfo.Controls.Add(_plantedFlowerControls.StateLabel, 0, 3);
-            return tileFlowerInfo;
+            _tileFlowerInfo.Controls.Add(_plantedFlowerControls.GrowthDaysLabel, 0, 0);
+            _tileFlowerInfo.Controls.Add(_plantedFlowerControls.BloomDaysLabel, 0, 1);
+            _tileFlowerInfo.Controls.Add(_plantedFlowerControls.DaysSinceLastWateredLabel, 0, 2);
+            _tileFlowerInfo.Controls.Add(_plantedFlowerControls.StateLabel, 0, 3);
+            return _tileFlowerInfo;
         }
 
         private Panel CreateTileUserButtonsPanel()
@@ -670,7 +753,7 @@ namespace VirtualGarden
             Type type = typeof(FlowerTypeControls);
             PropertyInfo[] flowerTypeControlsProperties = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-            flowerTypePanel.RowCount = flowerTypeControlsProperties.Length + 1; //+1 fot the buy button
+            flowerTypePanel.RowCount = flowerTypeControlsProperties.Length + 2; //+1 for the buy button
             flowerTypePanel.ColumnCount = 1;
             AddSameSizeRowStyle(flowerTypePanel);
             for ( int i = 0; i < flowerTypeControlsProperties.Length; i++)
@@ -681,9 +764,48 @@ namespace VirtualGarden
             Button buyAndPlantButton = CreateButton("Buy seeds and plant");
             buyAndPlantButton.Click += (s, e) => buyAndPlantButton_Click(flower);
             _buyAndPlantButtons.Add(buyAndPlantButton);
-            flowerTypePanel.Controls.Add(buyAndPlantButton, 0, flowerTypeControlsProperties.Length);
+            flowerTypePanel.Controls.Add(buyAndPlantButton, 0, flowerTypeControlsProperties.Length + 1);
 
             return flowerTypePanel;
+        }
+        private class FlowerBloomCountLabel
+        {
+            public FlowerType FlowerType {  get; private set; }
+            public Label label { get; } = CreateLabel();
+            internal FlowerBloomCountLabel(FlowerType flowerType)
+            {
+                FlowerType = flowerType;
+            }
+        }
+
+        private void UpdateBloomCountLabels()
+        {
+            foreach (FlowerBloomCountLabel label in _bloomCountLabels)
+            {
+                label.label.Text = $"{label.FlowerType.Name}: {_garden.Player.FlowerTypesBloomCount[label.FlowerType]}";
+            }
+        }
+
+        private Panel CreateBloomCountPanel()
+        {
+            TableLayoutPanel bloomCountPanel = new TableLayoutPanel();
+            bloomCountPanel.BackColor = Color.MistyRose;
+            bloomCountPanel.Dock = DockStyle.Fill;
+            bloomCountPanel.RowCount = _garden.Player.FlowerTypesBloomCount.Count + 1; //+1 for header
+            bloomCountPanel.ColumnCount = 1;
+            AddSameSizeRowStyle(bloomCountPanel);
+
+            bloomCountPanel.Controls.Add(CreateLabel("Counts of flowers that have bloomed of each type:"), 0, 0);
+
+            int row = 1;
+            foreach (var flowerType in _garden.Player.FlowerTypesBloomCount.Keys)
+            {
+                FlowerBloomCountLabel flowerBloomCountLabel = new FlowerBloomCountLabel(flowerType);
+                _bloomCountLabels.Add(flowerBloomCountLabel);
+                bloomCountPanel.Controls.Add(flowerBloomCountLabel.label, 0, row);
+                row++;
+            }
+            return bloomCountPanel;
         }
 
         private void ResizeControl(Control control, Panel panel, double widthPercentage, double heightPercentage)
@@ -862,7 +984,7 @@ namespace VirtualGarden
         {
             if (_chosenTile is null)
             {
-                throw new UnableToUpdateUIException("Cannot water flower. No tile is selected.");
+                throw new NoTileIsSelectedUIException("Cannot water flower. No tile is selected.");
             }
             try
             {
@@ -879,7 +1001,7 @@ namespace VirtualGarden
         {
             if (_chosenTile is null)
             {
-                throw new UnableToUpdateUIException($"Cannot remove weed on a tile. No tile is selected.");
+                throw new NoTileIsSelectedUIException($"Cannot remove weed on a tile. No tile is selected.");
             }
             try
             {
@@ -896,7 +1018,7 @@ namespace VirtualGarden
         {
             if (_chosenTile is null)
             {
-                throw new UnableToUpdateUIException($"Cannot remove bugs on a tile. No tile is selected.");
+                throw new NoTileIsSelectedUIException($"Cannot remove bugs on a tile. No tile is selected.");
             }
             try
             {
@@ -913,7 +1035,7 @@ namespace VirtualGarden
         {
             if (_chosenTile is null)
             {
-                throw new UnableToUpdateUIException("Cannot collect coins on a tile. No tile is selected.");
+                throw new NoTileIsSelectedUIException("Cannot collect coins on a tile. No tile is selected.");
             }
             try
             {
@@ -930,7 +1052,7 @@ namespace VirtualGarden
         {
             if (_chosenTile is null)
             {
-                throw new UnableToUpdateUIException($"Cannot plant flower on a tile. No tile is selected");
+                throw new NoTileIsSelectedUIException($"Cannot plant flower on a tile. No tile is selected");
             }
             _state = UIState.FLOWER_CATALOGUE;
             UpdateUI();
@@ -940,7 +1062,7 @@ namespace VirtualGarden
         {
             if (_chosenTile is null)
             {
-                throw new UnableToUpdateUIException($"Cannot remove flower on a tile. No tile is selected");
+                throw new NoTileIsSelectedUIException($"Cannot remove flower on a tile. No tile is selected");
             }
             try
             {
@@ -984,7 +1106,7 @@ namespace VirtualGarden
         {
             if (_chosenTile is null)
             {
-                throw new UnableToUpdateUIException("Cannot plant flower on a tile. No tile is selected.");
+                throw new NoTileIsSelectedUIException("Cannot plant flower on a tile. No tile is selected.");
             }
             try
             {

@@ -19,7 +19,7 @@ namespace VirtualGarden
         public Player Player {  get; private set; }
 
         //The probability that weeds will be spawned on one empty tile the next day with no active event affecting weed spawning.
-        private double _normalWeedChance = 0.10;
+        private double _normalWeedChance = 0.08;
 
         /// <summary>
         /// The probability that weeds will be spawned on one empty tile the next day.
@@ -28,7 +28,7 @@ namespace VirtualGarden
         {
             get
             {
-                if (_event is HighTemperature highTemperature)
+                if (Event is HighTemperature highTemperature)
                 {
                     return _normalWeedChance * highTemperature.WeedChanceMultiply;
                 }
@@ -46,7 +46,7 @@ namespace VirtualGarden
         {
             get
             {
-                if (_event is HumidWeatherEvent humidWeatherEvent)
+                if (Event is HumidWeatherEvent humidWeatherEvent)
                 {
                     return _normalBugsChance * humidWeatherEvent.BugChanceMultiply;
                 }
@@ -69,12 +69,12 @@ namespace VirtualGarden
         private bool _eventsEnabled = false;
 
         //The current active event or null if no event is currently active.
-        private Event? _event;
+        public Event? Event { get; private set; }
 
         /// <summary>
         /// The probability of a random event starting on a day with no active event.
         /// </summary>
-        public double EventChance { get; private set; } = 0.2;
+        public double EventChance { get; private set; } = 0.35;
 
         /// <summary>
         /// The number of flowers currently planted in the garden that are alive (growing or blooming).
@@ -155,16 +155,30 @@ namespace VirtualGarden
         /// </summary>
         public void NewDay()
         {
+            UpdateOngoingEvent();
             UpdateExistingBugInfestations();
             UpdateFlowers();
             UpdateWateredStateOfFlowers();
             UpdateWeed();
             TrySpawningBugInfestations();
             UpdatePlayer();
+            TryStartingAnEvent();
+        }
+
+        private void UpdateOngoingEvent()
+        {
+            if (Event is not null)
+            {
+                Event.Update();
+                if (Event.DaysLeft == 0)
+                {
+                    Event = null;
+                }
+            }
         }
 
         //Lowers the countdowns until flowers die from their current bug infestations.
-        public void UpdateExistingBugInfestations()
+        private void UpdateExistingBugInfestations()
         {
             foreach (Tile tile in Grid)
             {
@@ -177,23 +191,23 @@ namespace VirtualGarden
          * Updates growth days and bloom days of flowers that are not affected by weed or bugs. 
          Puts coins on tiles with blooming flowers.
          */
-        public void UpdateFlowers()
+        private void UpdateFlowers()
         {
             foreach (Tile tile in Grid)
             {
                 if (tile.Flower is not null)
-                tile.UpdateFlower();
+                tile.UpdateFlower(Player);
             }
         }
 
         //Updates the number of days since the flower was last watered.
-        public void UpdateWateredStateOfFlowers()
+        private void UpdateWateredStateOfFlowers()
         {
             foreach (Tile tile in Grid)
             {
                 if (tile.Flower is not null)
                 {
-                    if (_event is RainEvent)
+                    if (Event is RainEvent)
                     {
                         tile.WaterFlower();
                     }
@@ -206,7 +220,7 @@ namespace VirtualGarden
         }
 
         //Updates weed for a new day - tries spreading weed from previous days and spawning new weed to empty tiles
-        public void UpdateWeed()
+        private void UpdateWeed()
         {
             bool[,] currentPosOfWeed = GetCurrentPosOfWeed();
 
@@ -220,7 +234,7 @@ namespace VirtualGarden
         }
 
         //Tries spawning new bug infestations on tiles with live flowers without bug infestations.
-        public void TrySpawningBugInfestations()
+        private void TrySpawningBugInfestations()
         {
             foreach (Tile tile in Grid)
             {
@@ -235,44 +249,36 @@ namespace VirtualGarden
         }
 
         //Updates player's info for a new day.
-        public void UpdatePlayer()
+        private void UpdatePlayer()
         {
             Player.Update();
         }
 
-        public void UpdateEvents()
+        private void TryStartingAnEvent()
         {
-            if (_event is not null)
-            {
-                _event.Update();
-                if (_event.DaysLeft == 0)
-                {
-                    _event = null;
-                }
-            }
-            if (_event is null)
+            
+            if (Event is null)
             {
                 if (Rand.NextDouble() < EventChance)
                 {
-                    //pick a random event
+                    Event = EventGenerator.GenerateEvent(Rand, Rows * Columns);
                 }
             }
-            
         }
 
-        public void SpawnInfestation(Tile tile)
+        private void SpawnInfestation(Tile tile)
         {
             if (tile.Flower is null)
             {
                 throw new FlowerNotPresentException($"Cannot spawn bugs on tile {tile.PrintCoordinates()}. No flower present on this tile.");
             }
             var bugWeights = tile.Flower.FlowerType.BugWeights;
-            Bugs bugs = WeightedRandom.ChooseWeightedRandom<Bugs, BugsWeight<Bugs>>(bugWeights, Rand);
+            Bugs bugs = WeightedRandom.ChooseWeightedRandom<Bugs, BugsWeight>(bugWeights, Rand);
             tile.SpawnBugInfestation(new BugInfestation(bugs));
 
         }
 
-        public bool[,] GetCurrentPosOfWeed()
+        private bool[,] GetCurrentPosOfWeed()
         {
             bool[,] currentWeedPositions = new bool[Rows, Columns];
             for (int i = 0; i < Rows; i++)
@@ -286,7 +292,7 @@ namespace VirtualGarden
         }
 
         //Takes each tile in the grid without weed and tries spreading weed to it from adjacent tiles with weed
-        public void TrySpreadingWeed(bool[,] currentPosOfWeed)
+        private void TrySpreadingWeed(bool[,] currentPosOfWeed)
         {
             foreach (Tile tile in Grid)
             {
@@ -302,7 +308,7 @@ namespace VirtualGarden
                 }
             }
         }
-        public List<(int, int)> GetIndexesOfAdjacentTiles(int row, int column)
+        private List<(int, int)> GetIndexesOfAdjacentTiles(int row, int column)
         {
             List<(int, int)> adjacentIndexes = new List<(int, int)>();
             (int, int)[] possibleAdjacentIndexes = new (int, int)[] { (row + 1, column), (row, column + 1), (row - 1, column), (row, column - 1) };
@@ -315,7 +321,7 @@ namespace VirtualGarden
             return adjacentIndexes;
         }
 
-        public List<(int, int)> GetIndexesOfAdjacentTiles((int, int) pos)
+        private List<(int, int)> GetIndexesOfAdjacentTiles((int, int) pos)
         {
             return GetIndexesOfAdjacentTiles(pos.Item1, pos.Item2);
         }
@@ -323,7 +329,7 @@ namespace VirtualGarden
         public void PlantFlower(Tile tile, FlowerType flower)
         {
             tile.PlantFlower(flower);
-            if (_event is RainEvent)
+            if (Event is RainEvent)
             {
                 tile.WaterFlower();
             }
@@ -347,9 +353,9 @@ namespace VirtualGarden
 
         public void WaterFlower(Tile tile)
         {
-            if (_event is DroughtEvent)
+            if (Event is DroughtEvent)
             {
-                DroughtEvent droughtEvent = (DroughtEvent) _event;
+                DroughtEvent droughtEvent = (DroughtEvent) Event;
                 if (!droughtEvent.CanWater)
                 {
                     throw new NoWaterLeftException($"Cannot water flower on tile {tile.PrintCoordinates()}. There is no water left.");
@@ -371,7 +377,7 @@ namespace VirtualGarden
 
         public void RemoveWeed(Tile tile)
         {
-            if (_event is BrokenToolsEvent)
+            if (Event is BrokenToolsEvent)
             {
                 throw new BrokenToolsException($"Cannot remove weed from tile {tile.PrintCoordinates()}. The tools are broken.");
             }
@@ -406,25 +412,9 @@ namespace VirtualGarden
             tile.RemoveFlower();
         }
 
-        public void PayToRepairTools()
+        private void EndEvent()
         {
-            int price = CountToolRepairPrice();
-            if (Player.Money < price)
-            {
-                throw new InsufficientFundsException($"Cannot repair tools. The player does not have enought money.");
-            }
-            Player.SpendMoney(price);
-            EndEvent();
-        }
-
-        public int CountToolRepairPrice()
-        {
-            return 0;
-        }
-
-        public void EndEvent()
-        {
-            _event = null;
+            Event = null;
         }
 
         public void KillFlower(int numberOfFlowerToBeKilled)

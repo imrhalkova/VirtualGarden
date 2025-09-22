@@ -89,7 +89,7 @@ namespace VirtualGarden
         }
     }
     
-    public class BugsWeight<Bugs> : IWeightedItem<Bugs>
+    public class BugsWeight : IWeightedItem<Bugs>
     {
         public Bugs Item { get; private set; }
         public int Weight { get; private set; }

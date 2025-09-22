@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,12 +21,29 @@ namespace VirtualGarden
 
         public int NumberOfDay { get; set; } = 1;
 
+        public Dictionary<FlowerType, int> FlowerTypesBloomCount { get; private set; }
+
         public Player(int startingCoins, int newDayIncome)
         {
             Money = startingCoins;
             NewDayIncome = newDayIncome;
+            InitializeFlowerTypesBloomedDict();
         }
-        public Player() { }
+        public Player() { InitializeFlowerTypesBloomedDict(); }
+
+        private void InitializeFlowerTypesBloomedDict()
+        {
+            FlowerTypesBloomCount = new Dictionary<FlowerType, int>();
+            Type type = typeof(FlowerTypes);
+            FieldInfo[] flowerTypesFields = type.GetFields(BindingFlags.Public | BindingFlags.Static);
+            foreach (FieldInfo flowerTypeField in flowerTypesFields)
+            {
+                if(flowerTypeField.GetValue(null) is FlowerType flowerType)
+                {
+                    FlowerTypesBloomCount.Add(flowerType, 0);
+                }
+            }
+        }
 
         public void Update()
         {

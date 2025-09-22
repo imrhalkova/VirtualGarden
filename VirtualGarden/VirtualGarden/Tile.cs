@@ -96,7 +96,7 @@ namespace VirtualGarden
             Coins = 0;
         }
 
-        public void UpdateFlower()
+        public void UpdateFlower(Player player)
         {
             if (Flower is null)
             {
@@ -110,6 +110,7 @@ namespace VirtualGarden
                 if (Flower.GrowthDays == Flower.FlowerType.GrowthDays)
                 {
                     Flower.State = FlowerState.Blooming;
+                    player.FlowerTypesBloomCount[Flower.FlowerType] += 1;
                 }
             }
             if (Flower.State == FlowerState.Blooming && Flower.BloomDays < Flower.FlowerType.BloomDays && !HasWeed && Bugs is null)

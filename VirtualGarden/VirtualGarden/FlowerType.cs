@@ -47,7 +47,7 @@ namespace VirtualGarden
         /// <summary>
         /// A list of weights for each bug type signifying how likely is that bugtype to be in a bug infestation on this flower.
         /// </summary>
-        public abstract List<BugsWeight<Bugs>> BugWeights { get; }
+        public abstract List<BugsWeight> BugWeights { get; }
 
         /// <summary>
         /// The filename of a file containing an image of this flower blooming.
@@ -89,72 +89,72 @@ namespace VirtualGarden
 
     public class Daisy : FlowerType
     {
-        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
+        public override List<BugsWeight> BugWeights { get; } = new List<BugsWeight>
         { 
-            new BugsWeight<Bugs>(BugTypes.CommonBugs, 10),
-            new BugsWeight<Bugs>(BugTypes.GardenBugs, 0),
-            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
-            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
+            new BugsWeight(BugTypes.CommonBugs, 10),
+            new BugsWeight(BugTypes.GardenBugs, 0),
+            new BugsWeight(BugTypes.ExoticBugs, 0),
+            new BugsWeight(BugTypes.TropicalBugs, 0),
         };
         public Daisy() : base("Daisy", 5, 0, 5, 3, 5, "daisy.png") { }
     }
 
     public class Marigold : FlowerType
     {
-        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
+        public override List<BugsWeight> BugWeights { get; } = new List<BugsWeight>
         {
-            new BugsWeight<Bugs>(BugTypes.CommonBugs, 10),
-            new BugsWeight<Bugs>(BugTypes.GardenBugs, 0),
-            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
-            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
+            new BugsWeight(BugTypes.CommonBugs, 10),
+            new BugsWeight(BugTypes.GardenBugs, 0),
+            new BugsWeight(BugTypes.ExoticBugs, 0),
+            new BugsWeight(BugTypes.TropicalBugs, 0),
         };
         public Marigold() : base("Marigold", 20, 1, 6, 6, 5, "marigold.png") { }
     }
 
     public class Sunflower : FlowerType
     {
-        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
+        public override List<BugsWeight> BugWeights { get; } = new List<BugsWeight>
         {
-            new BugsWeight<Bugs>(BugTypes.CommonBugs, 9),
-            new BugsWeight<Bugs>(BugTypes.GardenBugs, 1),
-            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
-            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
+            new BugsWeight(BugTypes.CommonBugs, 9),
+            new BugsWeight(BugTypes.GardenBugs, 1),
+            new BugsWeight(BugTypes.ExoticBugs, 0),
+            new BugsWeight(BugTypes.TropicalBugs, 0),
         };
         public Sunflower() : base("Sunflower", 50, 2, 8, 10, 13, "sunflower.png") { }
     }
 
     public class Petunia : FlowerType
     {
-        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
+        public override List<BugsWeight> BugWeights { get; } = new List<BugsWeight>
         {
-            new BugsWeight<Bugs>(BugTypes.CommonBugs, 8),
-            new BugsWeight<Bugs>(BugTypes.GardenBugs, 2),
-            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
-            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
+            new BugsWeight(BugTypes.CommonBugs, 8),
+            new BugsWeight(BugTypes.GardenBugs, 2),
+            new BugsWeight(BugTypes.ExoticBugs, 0),
+            new BugsWeight(BugTypes.TropicalBugs, 0),
         };
         public Petunia() : base("Petunia", 80, 1, 9, 10, 20, "petunia.png") { }
     }
 
     public class Rose : FlowerType
     {
-        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
+        public override List<BugsWeight> BugWeights { get; } = new List<BugsWeight>
         {
-            new BugsWeight<Bugs>(BugTypes.CommonBugs, 2),
-            new BugsWeight<Bugs>(BugTypes.GardenBugs, 6),
-            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 1),
-            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 1),
+            new BugsWeight(BugTypes.CommonBugs, 2),
+            new BugsWeight(BugTypes.GardenBugs, 6),
+            new BugsWeight(BugTypes.ExoticBugs, 1),
+            new BugsWeight(BugTypes.TropicalBugs, 1),
         };
         public Rose() : base("Rose", 300, 0, 20, 5, 180, "rose.png") { }
     }
 
     public class Tulip : FlowerType
     {
-        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
+        public override List<BugsWeight> BugWeights { get; } = new List<BugsWeight>
         {
-            new BugsWeight<Bugs>(BugTypes.CommonBugs, 2),
-            new BugsWeight<Bugs>(BugTypes.GardenBugs, 6),
-            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
-            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 2),
+            new BugsWeight(BugTypes.CommonBugs, 2),
+            new BugsWeight(BugTypes.GardenBugs, 6),
+            new BugsWeight(BugTypes.ExoticBugs, 0),
+            new BugsWeight(BugTypes.TropicalBugs, 2),
         };
         public Tulip() : base("Tulip", 500, 1, 12, 8, 130, "tulip.png") { }
     }

@@ -40,12 +40,12 @@ namespace VirtualGardenTests
     //A flower for testing that grows and blooms for one day and has to be watered every day
     internal class TestFlower1 : FlowerType
     {
-        public override List<BugsWeight<Bugs>> BugWeights { get; } = new List<BugsWeight<Bugs>>
+        public override List<BugsWeight> BugWeights { get; } = new List<BugsWeight>
         {
-            new BugsWeight<Bugs>(BugTypes.CommonBugs, 10),
-            new BugsWeight<Bugs>(BugTypes.GardenBugs, 0),
-            new BugsWeight<Bugs>(BugTypes.ExoticBugs, 0),
-            new BugsWeight<Bugs>(BugTypes.TropicalBugs, 0),
+            new BugsWeight(BugTypes.CommonBugs, 10),
+            new BugsWeight(BugTypes.GardenBugs, 0),
+            new BugsWeight(BugTypes.ExoticBugs, 0),
+            new BugsWeight(BugTypes.TropicalBugs, 0),
         };
         public TestFlower1() : base("Test Flower", 0, 0, 1, 1, 5, "") { }
     }

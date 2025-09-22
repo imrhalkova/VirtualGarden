@@ -71,14 +71,9 @@ namespace VirtualGarden
         internal KillingAlreadyDeadFlowerException(string message) : base(message) { }
     }
 
-    public class KillingAlreadyDeadRabbitException : GardenException
+    public class EventGenerationException : GardenException
     {
-        internal KillingAlreadyDeadRabbitException(string message) : base(message) { }
-    }
-
-    public class WildRabbitEventNotActiveException : GardenException
-    {
-        internal WildRabbitEventNotActiveException(string message) : base(message) { }
+        internal EventGenerationException(string message) : base(message) { }
     }
 
     public class FileException : Exception
@@ -96,8 +91,8 @@ namespace VirtualGarden
         internal UIException(string message) : base(message) { }
     }
 
-    public class UnableToUpdateUIException : Exception
+    public class NoTileIsSelectedUIException : UIException
     {
-        internal UnableToUpdateUIException(string message) : base(message) { }
+        internal NoTileIsSelectedUIException(string message) : base(message) { }
     }
 }
