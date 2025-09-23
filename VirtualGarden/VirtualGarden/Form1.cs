@@ -920,7 +920,7 @@ namespace VirtualGarden
                             }
                             PutImageOnTile(finalImage, _tileButtons[i, j]);
                         }
-                        catch (FileException ex)
+                        catch (LoadStoreException ex)
                         {
                             WriteErrorMessage(ex.Message);
                             _tileButtons[i, j].Text = "Image not loaded.";
@@ -940,7 +940,17 @@ namespace VirtualGarden
 
         private void LoadGameButton_Click(object? sender, EventArgs e)
         {
-
+            try
+            {
+                _garden = FileHandler.LoadGardenFromFile();
+                _state = UIState.GARDEN;
+                GardenUIInitialization();
+                UpdateUI();
+            }
+            catch (LoadStoreException ex)
+            {
+                WriteErrorMessage(ex.Message);
+            }
         }
 
         private void ExitGameButton_Click(object? sender, EventArgs e)
@@ -1176,8 +1186,15 @@ namespace VirtualGarden
 
         private void SaveButton_Click(object? sender, EventArgs e)
         {
-            //save the garden using reflection
-            throw new NotImplementedException();
+            try
+            {
+                FileHandler.SaveGardenToFile(_garden);
+            }
+            catch (LoadStoreException ex)
+            {
+                WriteErrorMessage(ex.Message);
+                UpdateUI();
+            }
         }
     }
 }

@@ -12,13 +12,21 @@ namespace VirtualGarden
     /// </summary>
     public class Garden
     {
-        //a grid of tiles in which the user can grow flowers
+        /// <summary>
+        /// A grid of tiles in which the user can grow flowers.
+        /// </summary>
         public Tile[,] Grid {  get; private set; }
 
-        //an instance of the Player class containing the current players info (amount of coins, statistics, ...)
+        /// <summary>
+        /// Contains the current players info (amount of coins, statistics, ...).
+        /// </summary>
+        [Save]
         public Player Player {  get; private set; }
 
-        //The probability that weeds will be spawned on one empty tile the next day with no active event affecting weed spawning.
+        /// <summary>
+        /// //The probability that weeds will be spawned on one empty tile the next day with no active event affecting weed spawning.
+        /// </summary>
+        [Save]
         private double _normalWeedChance = 0.08;
 
         /// <summary>
@@ -36,7 +44,10 @@ namespace VirtualGarden
             }
         }
 
-        //The probability that a bug infestation will be spawned on one tile with a flower the next day with no active event affecting bugs spawning.
+        /// <summary>
+        /// The probability that a bug infestation will be spawned on one tile with a flower the next day with no active event affecting bugs spawning.
+        /// </summary>
+        [Save]
         private double _normalBugsChance = 0.05;
 
         /// <summary>
@@ -65,15 +76,28 @@ namespace VirtualGarden
         /// </summary>
         public IRandomNumberGenerator Rand { get; } = new DefaultRandomGenerator();
 
-        //Enables/Disables events in the game.
-        private bool _eventsEnabled = false;
+        /// <summary>
+        /// Enables/Disables events in the game.
+        /// </summary>
+        [Save]
+        private bool _eventsEnabled = true;
 
-        //The current active event or null if no event is currently active.
+        /// <summary>
+        /// The current active event or null if no event is currently active.
+        /// </summary>
+        [Save]
         public Event? Event { get; private set; }
+
+        /// <summary>
+        /// The full type name of the current active event or null if no event is active.
+        /// </summary>
+        [Save]
+        public string? EventTypeName => Event?.GetType().FullName;
 
         /// <summary>
         /// The probability of a random event starting on a day with no active event.
         /// </summary>
+        [Save]
         public double EventChance { get; private set; } = 0.35;
 
         /// <summary>
@@ -94,10 +118,16 @@ namespace VirtualGarden
                 return count;
             }
         }
-
+        /// <summary>
+        /// The number of rows the tile grid has.
+        /// </summary>
         public int Rows { get { return this.Grid.GetLength(0); } }
-        public int Columns { get { return this.Grid.GetLength(1); } }
 
+        /// <summary>
+        /// The number of columns the tile grid has.
+        /// </summary>
+        public int Columns { get { return this.Grid.GetLength(1); } }
+        private Garden() { }
         public Garden(int rows, int columns, Player player) 
         {
             InitializeGrid(rows, columns);
@@ -257,7 +287,7 @@ namespace VirtualGarden
         private void TryStartingAnEvent()
         {
             
-            if (Event is null)
+            if (Event is null && _eventsEnabled)
             {
                 if (Rand.NextDouble() < EventChance)
                 {

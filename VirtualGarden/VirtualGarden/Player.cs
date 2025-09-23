@@ -12,15 +12,25 @@ namespace VirtualGarden
         /// <summary>
         /// The number of coins the player currently has.
         /// </summary>
+        [Save]
         public int Money { get; private set; } = 0;
 
         /// <summary>
-        /// The number of coins the player automatically receives with each new day
+        /// The number of coins the player automatically receives with each new day.
         /// </summary>
+        [Save]
         public int NewDayIncome { get; private set; } = 10;
 
+        /// <summary>
+        /// Number of the current day.
+        /// </summary>
+        [Save]
         public int NumberOfDay { get; set; } = 1;
 
+        /// <summary>
+        /// The count of flowers that have bloomed for each flower type.
+        /// </summary>
+        [Save]
         public Dictionary<FlowerType, int> FlowerTypesBloomCount { get; private set; }
 
         public Player(int startingCoins, int newDayIncome)

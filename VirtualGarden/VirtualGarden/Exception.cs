@@ -76,14 +76,24 @@ namespace VirtualGarden
         internal EventGenerationException(string message) : base(message) { }
     }
 
-    public class FileException : Exception
+    public class LoadStoreException : Exception
     {
-        internal FileException(string message) : base(message) { }
+        internal LoadStoreException(string message) : base(message) { }
     }
 
-    public class UnableToLoadImageFromFileException : FileException
+    public class UnableToLoadImageFromFileException : LoadStoreException
     {
         internal UnableToLoadImageFromFileException(string message) : base(message) { }
+    }
+
+    public class SerializationException : LoadStoreException
+    {
+        internal SerializationException(string message) : base(message) { }
+    }
+
+    public class DeserializationException : LoadStoreException
+    {
+        internal DeserializationException(string message) : base(message) { }
     }
 
     public class UIException : Exception

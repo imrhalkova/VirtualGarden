@@ -6,11 +6,25 @@ using System.Threading.Tasks;
 
 namespace VirtualGarden
 {
+    /// <summary>
+    /// The abstract class from which all events inherit.
+    /// </summary>
     public abstract class Event
     {
+        /// <summary>
+        /// The name of the event.
+        /// </summary>
         public abstract string Name { get; }
+        /// <summary>
+        /// The description of the event.
+        /// </summary>
         public abstract string Description { get; }
+        /// <summary>
+        /// The number of days left of the event.
+        /// </summary>
+        [Save]
         public int DaysLeft { get; protected set; }
+        protected Event() { }
         protected Event(int daysLeft)
         {
             DaysLeft = daysLeft;
@@ -22,9 +36,19 @@ namespace VirtualGarden
     {
         public override string Name { get; } = "Drought";
         public override string Description { get; } = "A Drought has come to town. You can water only a limited number of flowers.";
+        /// <summary>
+        /// How many flowers the player can water this day.
+        /// </summary>
+        [Save]
         public int NumberOfWateringsADay {  get; private set; }
+        /// <summary>
+        /// How many flowers have already been watered today.
+        /// </summary>
+        [Save]
         public int NumberOfWateringsDoneToday { get; private set; }
-
+        /// <summary>
+        /// True if the player can still water flowers today, false otherwise.
+        /// </summary>
         public bool CanWater
         {
             get
@@ -32,6 +56,9 @@ namespace VirtualGarden
                 return NumberOfRemainingWaterings > 0;
             }
         }
+        /// <summary>
+        /// The number of flowers the player can still water today.
+        /// </summary>
         public int NumberOfRemainingWaterings
         {
             get
@@ -39,6 +66,7 @@ namespace VirtualGarden
                 return NumberOfWateringsADay - NumberOfWateringsDoneToday;
             }
         }
+        private DroughtEvent() : base() { }
         public DroughtEvent(int daysLeft, int numberOfWateringsADay) : base(daysLeft)
         {
             NumberOfWateringsADay = numberOfWateringsADay;
@@ -61,6 +89,7 @@ namespace VirtualGarden
     {
         public override string Name { get; } = "Rain";
         public override string Description { get; } = "It's raining today. All your flowers will be automatically watered.";
+        private RainEvent() : base() { }
         public RainEvent(int daysLeft) : base(daysLeft) { }
         public override void Update()
         {
@@ -72,6 +101,7 @@ namespace VirtualGarden
     {
         public override string Name { get; } = "Broken Tools";
         public override string Description { get; } = "Your tools have broken down. It will take some time to repair them. You won't be able to remove any weed while they are broken.";
+        private BrokenToolsEvent() : base() { }
         public BrokenToolsEvent(int daysLeft) : base(daysLeft) {}
         public override void Update()
         {
@@ -83,7 +113,9 @@ namespace VirtualGarden
     {
         public override string Name { get; } = "Humid Weather";
         public override string Description { get; } = "The weather is humid today. There is a higher chance of bugs appearing than normal.";
+        [Save]
         public double BugChanceMultiply { get; private set; }
+        private HumidWeatherEvent() : base() { }
         public HumidWeatherEvent(int daysLeft, double bugChanceMultiply) : base(daysLeft)
         {
             BugChanceMultiply = bugChanceMultiply;
@@ -98,7 +130,9 @@ namespace VirtualGarden
     {
         public override string Name { get; } = "High Temperature";
         public override string Description { get; } = "The temperature is high today. Weeds will grow more on your garden.";
+        [Save]
         public double WeedChanceMultiply { get; private set; }
+        private HighTemperature() : base() { }
         public HighTemperature(int  daysLeft, double weedChanceMultiply) : base(daysLeft)
         {
             WeedChanceMultiply = weedChanceMultiply;
@@ -120,6 +154,9 @@ namespace VirtualGarden
         }
     }
 
+    /// <summary>
+    /// Fulfills the function of generating new events.
+    /// </summary>
     public static class EventGenerator
     {
         private static List<EventWeight> EventWeights { get; } = new List<EventWeight>()
