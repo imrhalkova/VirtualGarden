@@ -13,18 +13,26 @@ namespace VirtualGarden
     public class Tile
     {
         //The number of the row this tile is in in the garden grid
+        [Save]
         public int Row { get; private set; }
 
         //The number of the column this tile is in in the garden grid
+        [Save]
         public int Column { get; private set; }
+        [Save]
         public PlantedFlower? Flower {  get; private set; }
 
         //An indicator whether there is weed on this tile
+        [Save]
         public bool HasWeed {  get; set; } = false;
+        [Save]
         public BugInfestation? Bugs { get; set; }
 
         //The number of coins that can be collected from this tile during the current day
+        [Save]
         public int Coins { get; set; }
+
+        private Tile() { }
 
         public Tile(int row, int column)
         {

@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace VirtualGarden
 {
-    public abstract class Bugs
+    public abstract class BugType
     {
         public string Name { get; private set; }
         public int SprayPrice { get; set; }
         public int DaysUntilFlowerDies { get; set; }
         public string ImageFilename { get; set; }
-        public Bugs(string name, int sprayPrice, int daysUntilFlowerDies, string imageFilename)
+        public BugType(string name, int sprayPrice, int daysUntilFlowerDies, string imageFilename)
         {
             Name = name;
             SprayPrice = sprayPrice;
@@ -21,40 +21,47 @@ namespace VirtualGarden
         }
     }
 
-    public class CommonBugs : Bugs
+    public class CommonBugs : BugType
     {
         public CommonBugs() : base("Common bugs", 5, 3, "bugs.png") { }
     }
 
-    public class GardenBugs : Bugs
+    public class GardenBugs : BugType
     {
         public GardenBugs() : base("Garden bugs", 90, 3, "bugs.png") { }
     }
 
-    public class ExoticBugs : Bugs
+    public class ExoticBugs : BugType
     {
         public ExoticBugs() : base("Exotic bugs", 250, 1, "bugs.png") { }
     }
 
-    public class TropicalBugs : Bugs
+    public class TropicalBugs : BugType
     {
         public TropicalBugs() : base("Tropical Bugs", 350, 3, "bugs.png") { }
     }
 
     public static class BugTypes
     {
-        public static Bugs CommonBugs = new CommonBugs();
-        public static Bugs GardenBugs = new GardenBugs();
-        public static Bugs ExoticBugs = new ExoticBugs();
-        public static Bugs TropicalBugs = new TropicalBugs();
+        public static BugType CommonBugs = new CommonBugs();
+        public static BugType GardenBugs = new GardenBugs();
+        public static BugType ExoticBugs = new ExoticBugs();
+        public static BugType TropicalBugs = new TropicalBugs();
     }
 
     public class BugInfestation
     {
-        public Bugs Bugs { get; private set; }
+        public BugType Bugs { get; private set; }
+        /// <summary>
+        /// The name of the flower type of this planted flower.
+        /// </summary>
+        [Save, NotLoad]
+        public string? BugsTypeName => Bugs.Name;
+        [Save]
         public int DaysUntilFlowerDies { get; private set; }
 
-        public BugInfestation(Bugs bugs)
+        private BugInfestation() { }
+        public BugInfestation(BugType bugs)
         {
             Bugs = bugs;
             DaysUntilFlowerDies = bugs.DaysUntilFlowerDies;
@@ -89,12 +96,12 @@ namespace VirtualGarden
         }
     }
     
-    public class BugsWeight : IWeightedItem<Bugs>
+    public class BugsWeight : IWeightedItem<BugType>
     {
-        public Bugs Item { get; private set; }
+        public BugType Item { get; private set; }
         public int Weight { get; private set; }
 
-        public BugsWeight(Bugs bugs, int weight)
+        public BugsWeight(BugType bugs, int weight)
         {
             Item = bugs;
             Weight = weight;

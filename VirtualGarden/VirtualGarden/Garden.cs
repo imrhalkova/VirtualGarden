@@ -15,6 +15,7 @@ namespace VirtualGarden
         /// <summary>
         /// A grid of tiles in which the user can grow flowers.
         /// </summary>
+        [Save]
         public Tile[,] Grid {  get; private set; }
 
         /// <summary>
@@ -193,6 +194,7 @@ namespace VirtualGarden
             TrySpawningBugInfestations();
             UpdatePlayer();
             TryStartingAnEvent();
+            UpdateWateredStateDuringRain();
         }
 
         private void UpdateOngoingEvent()
@@ -245,6 +247,20 @@ namespace VirtualGarden
                     {
                         tile.UpdateWateredStateOfFlower();
                     }  
+                }
+            }
+        }
+
+        private void UpdateWateredStateDuringRain()
+        {
+            foreach (Tile tile in Grid)
+            {
+                if (tile.Flower is not null)
+                {
+                    if (Event is RainEvent)
+                    {
+                        tile.WaterFlower();
+                    }
                 }
             }
         }
@@ -303,7 +319,7 @@ namespace VirtualGarden
                 throw new FlowerNotPresentException($"Cannot spawn bugs on tile {tile.PrintCoordinates()}. No flower present on this tile.");
             }
             var bugWeights = tile.Flower.FlowerType.BugWeights;
-            Bugs bugs = WeightedRandom.ChooseWeightedRandom<Bugs, BugsWeight>(bugWeights, Rand);
+            BugType bugs = WeightedRandom.ChooseWeightedRandom<BugType, BugsWeight>(bugWeights, Rand);
             tile.SpawnBugInfestation(new BugInfestation(bugs));
 
         }
@@ -429,6 +445,7 @@ namespace VirtualGarden
             {
                 throw new InsufficientFundsException($"Cannot remove bugs from tile {tile.PrintCoordinates()}. Not enought money.");
             }
+            Player.SpendMoney(tile.Bugs.Bugs.SprayPrice);
             tile.RemoveBugs();
         }
 
