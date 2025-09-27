@@ -84,7 +84,7 @@ The 'Exit' button will exit the game without saving it and without asking the us
 
 Every new day the player is awarded 20 coins. The player can also collect money from blooming flowers.
 
-## Flowers
+### Flowers
 
 To plant a flower the player has to pay for flower seeds. The flower goes through 3 states. First the flower is in growing state which lasts the number of growth days for said flower. After that the flower enters blooming state during which it produces money that can be collected every day. The flower remains blooming for the flower's number of bloom days. After the flower fades or if its killed due to bugs or not being watered often enough, the flower is in dead state.
 
