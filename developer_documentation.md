@@ -45,20 +45,41 @@ The `Update()` function is used to update the event for a new day.
 
 ### `FlowerType`
 
+The `FlowerType` class is the abstract class from which all types of flowers (Daisy, Rose, Tulip, ...) inherit.
+
 ### `PlantedFlower`
+
+The `PlantedFlower` class contains information associated with a concrete planted flower in the garden.
 
 ### `BugType`
 
+The `BugType` class is the abstract class from which all types of bugs inherit.
+
 ### `BugInfestation`
+
+The `BugInfestation` class contains information about a specific bug infestation on a flower.
+
+## Transition between days
+
+The `Garden.NewDay()` function is used to transition between days in the game. It does the following:
+- updates ongoing events and ends those that have run out
+- updates previously spawned infestations in the garden
+- updates the growth and bloom days of flowers and their state
+- updates the `DaysSinceLastWatered` for flowers
+- updates weed in the garden (both tries spreading existing weed and spawning new weed)
+- tries spawning new bug infestations
+- updates the player
+- if there is no active event, it tries starting a new event
+- if the active event is raining, it waters all flowers
 
 ## Saving/Loading
 
 The saving a loading of the game is done by the `FileHandler` class. Its `SaveGardenToFile(Garden garden)` function saves the passed instance of `Garden` into a `.JSON` file so that it can be loaded later. The fields and properties needed for reconstructing the `Garden` are first, with the use of reflection, converted to a
 `Dictionary<string, object?>` dictionary which is then saved into a JSON file `save.JSON` inside the `saves` folder that is created in the same directory as the application's `.exe` file.
 
-The game is loaded back with the `LoadGardenFromFile()` which returns an instance of the garden saved `.JSON` file using reflection.
+The game is loaded back with the `LoadGardenFromFile()` which returns an instance of the garden that is saved in the `save.JSON` file using reflection.
 
-### The structure of the save file
+### The structure of the JSON save file
 
 - `Grid`: the garden's grid of tiles.
   - `rows`: the number of rows of the grid
