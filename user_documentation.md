@@ -24,11 +24,11 @@ The button 'Exit' immediately ends the application.
 
 ### The garden
 
-After creating a new game or loading a saved one the user sees a screen with the flower garden. A possible look of the garden after playing a bit:
+After creating a new game or loading a saved one the user sees a screen with the flower garden. A possible look of the garden after playing a few in game days:
 <img width="2551" height="1315" alt="Screenshot 2025-09-26 224631" src="https://github.com/user-attachments/assets/0533ab95-6488-468d-a419-ea3aebc3f790" />
 
 On the right top side there are two buttons. The button 'menu' will bring the player into the game menu where the player can save or exit the game.
-The 'flower catalogue' button will bring it user to the flower catalogue which contains information about flower types in the game which the user needs to take care of the flowers.
+The 'flower catalogue' button will bring the user to the flower catalogue which contains information about all flower types in the game which the user needs to take care of the flowers.
 
 Bellow that there is a blue box containing the amount of money the player has and the number of the current day.
 
@@ -38,7 +38,7 @@ In the top centre of the screen there is a yellow 'New day' button which is used
 
 Below the new day button there are the tiles of the garden. The screen with the info of a specific tile is accessed by clicking said tile.
 
-the left side of the screen is used for displaying the info about the current active event in a light blue box. The event info includes name, description, number of days left plus additional info for specific events. If no event is currently active the blue box is not visible at all.
+The left side of the screen is used for displaying the info about the current active event in a light blue box. The event info includes name, description, number of days left plus additional info for specific events. If no event is currently active the blue box is not visible at all.
 
 ### A tile
 
@@ -49,11 +49,11 @@ At the left top of the screen there is the 'Back to garden' button which will re
 
 At the top right of the screen, the amount of money the user has is shown.
 
-In the middle of the screen there are two columns with information. The left column displays information about the selected tile: the row and column of the tile (starting at 0), if there is a flower planted on this tile and which one, if there is weed on this tile, if there are bugs on this tile and if they are the, the amount of money needed to get rid of them and the number of days until they kill the flower on this tile, and lastly the number of money/coins and player has.
+In the middle of the screen there are two columns with information. The left column displays information about the selected tile: the row and column of the tile (starting at 0), if there is a flower planted on this tile and which one, if there is weed on this tile, if there are bugs on this tile and if there are bugs, the amount of money needed to get rid of them and the number of days until they kill the flower on this tile, and lastly the number of money/coins the player has.
 
-The right column displays information about the flower planted on this tile. If there is no flower planted on it, the column is not visible at all. The information displayed is the number of days this flower has already grown, the number of days this flower has bloomed, the number of days since this flower has been watered and the state of the flower (growing, blooming or dead).
+The right column displays information about the flower planted on this tile. If there is no flower planted on it, the column is not visible at all. The information displayed: the number of days this flower has already grown, the number of days this flower has bloomed, the number of days since this flower has been watered and the state of the flower (growing, blooming or dead).
 
-At the bottom of the screen there are six buttons used to interact with the tile and the flower on it. The 'Water' button waters and flower planted on this tile. The 'Remove weed' button removes weed from this tile if there is any. The 'Remove bugs' button removes bugs from this tile and subtracts the amount of money needed for it from the player. There must be bugs on the tile and the player must have sufficient funds for the bug spray. The 'Collect coins' button collects coins from this tile that were produced by a blooming flower. The coins are added to the player's funds. The 'Plant flower' button will take the user to the flower catalogue from where they can choose a flower to plant on this tile provided there is currently no flower planted on this tile. The 'Remove flower' button will remove the flower planted on this tile without asking the user for confirmation.
+At the bottom of the screen there are six buttons used to interact with the tile and the flower on it. The 'Water' button waters the flower planted on this tile. The 'Remove weed' button removes weed from this tile if there is any. The 'Remove bugs' button removes bugs from this tile and subtracts the amount of money needed for it from the player. There must be bugs on the tile and the player must have sufficient funds for the bug spray. The 'Collect coins' button collects coins from this tile that were produced by a blooming flower. The coins are added to the player's funds. The 'Plant flower' button will take the user to the flower catalogue from where they can choose a flower to plant on this tile provided there is currently no flower planted on this tile. The 'Remove flower' button will remove the flower planted on this tile without asking the user for confirmation.
 
 ### The flower catalogue
 
@@ -64,7 +64,7 @@ At the left top of the screen there is the 'Back to garden' button, which will r
 
 The rest of the screen is filled with information for each flower type. The information includes the name of the flower, the number of days it needs to grow and start blooming, the number of days it blooms, the maximum number of days the flower can survive without being watered, the amount of money this flower produces during one day of blooming, the maximum amount of money the player can collect from this flower and the price of the flower's seeds.
 
-If the player entered the screen from the tile screen there is also a 'Buy seeds and plant' button visible under each flower information. Clicking the button will plant the said flower on the chosen tile and return the player to the garden screen. If the player entered the flower catalogue from the garden screen this button is not visible.
+If the player entered the screen from the tile screen there is also a 'Buy seeds and plant' button visible under each flower information. Clicking the button will plant said flower on the chosen tile and return the player to the garden screen. If the player entered the flower catalogue from the garden screen this button is not visible.
 
 ### The game menu
 
@@ -86,18 +86,32 @@ Every new day the player is awarded 20 coins. The player can also collect money 
 
 ### Flowers
 
-To plant a flower the player has to pay for flower seeds. The flower goes through 3 states. First the flower is in growing state which lasts the number of growth days for said flower. After that the flower enters blooming state during which it produces money that can be collected every day. The flower remains blooming for the flower's number of bloom days. After the flower fades or if its killed due to bugs or not being watered often enough, the flower is in dead state.
+To plant a flower the player has to pay for the flower seeds. The flower goes through 3 states. First the flower is in growing state which lasts the number of growth days for said flower. After that the flower enters blooming state during which it produces money that can be collected every day. The flower remains blooming for the flower's number of bloom days. After the flower fades or if its killed due to bugs or not being watered often enough, the flower is in dead state.
 
 Maximum days between watering signifies the maximum number of days this flower will survive not being watered.
 
 ### Weed
 
-Weed spawns on tiles without flowers. With new day it can spread to adjacent tiles, including the ones with flowers. When weed is on the same tile as a planted flower, if the flower is in growing state than the growth is stopped by the weed, if the flower is in blooming state, the blooming is paused and the flower does not produce money.
+Weed spawns on tiles without flowers. With a new day it can spread to adjacent tiles, including the ones with flowers. When weed is on the same tile as a planted flower, if the flower is in growing state than the growth is paused by the weed, if the flower is in blooming state, the blooming is paused and the flower does not produce money.
+
+In the UI tiles with weed change their color from brown to green.
 
 ### Bugs
 
-Bugs spawn on tiles with flowers. They kill the flower after a few days. To get rid of the bugs the player has to pay for a bug spray. There are different kind of bugs with different prices of bug sprays and different number of days until the flower is killed. If the flower is in the growing state, growth is paused as long as the bugs are there. If the flower is in blooming state. blooming is paused as long as the bugs are there.
+Bugs spawn on tiles with flowers. They kill the flower after a few days. To get rid of the bugs the player has to pay for a bug spray. There are different kind of bugs with different prices of bug sprays and different number of days until the flower is killed. If the flower is in growing state, growth is paused as long as the bugs are there. If the flower is in blooming state. blooming is paused as long as the bugs are there.
+
+In the UI tiles with bugs have black dots over them.
 
 ### Events
 
-There is a chance with each new day that an event will be triggered. If it is triggered, one of the possible events will be chosen.
+There is a chance with each new day that an event will be triggered. If it is triggered, one of the possible events will be chosen. The possible events are:
+
+Rain - all flowers are watered
+
+Drought - the player has a limited number of flowers they can water a day
+
+Humid weather - there is a higher chance of bugs appearing than normal
+
+High temperature - there is a higher chance of weeds appearing than normal
+
+Broken tools - the player cannot remove weed from tiles
